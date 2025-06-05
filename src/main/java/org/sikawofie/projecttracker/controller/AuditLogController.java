@@ -1,5 +1,10 @@
 package org.sikawofie.projecttracker.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.sikawofie.projecttracker.dto.AuditLogDTO;
 import org.sikawofie.projecttracker.entity.AuditLog;
@@ -16,15 +21,23 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/logs")
 @RequiredArgsConstructor
+@Tag(name = "Audit Log", description = "Operations related to audit logging and log retrieval")
 public class AuditLogController {
 
     private final AuditLogRepository auditLogRepository;
     private final AuditLogMapper auditLogMapper;
 
     @GetMapping
+    @Operation(
+            summary = "Get audit logs (non-paged)",
+            description = "Retrieves a list of audit logs filtered by optional parameters: entityType and actorName"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved list of audit logs")
+    })
     public ResponseEntity<List<AuditLogDTO>> getLogs(
-            @RequestParam(required = false) String entityType,
-            @RequestParam(required = false) String actorName) {
+            @Parameter(description = "Entity type to filter logs by") @RequestParam(required = false) String entityType,
+            @Parameter(description = "Actor name to filter logs by") @RequestParam(required = false) String actorName) {
 
         List<AuditLog> logs;
 
@@ -46,10 +59,17 @@ public class AuditLogController {
     }
 
     @GetMapping("/paged")
+    @Operation(
+            summary = "Get audit logs (paged)",
+            description = "Retrieves a paginated list of audit logs, with optional filters for entityType and actorName"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved paginated audit logs")
+    })
     public ResponseEntity<Page<AuditLogDTO>> getLogsPaged(
-            @RequestParam(required = false) String entityType,
-            @RequestParam(required = false) String actorName,
-            Pageable pageable) {
+            @Parameter(description = "Entity type to filter logs by") @RequestParam(required = false) String entityType,
+            @Parameter(description = "Actor name to filter logs by") @RequestParam(required = false) String actorName,
+            @Parameter(description = "Pagination and sorting information") Pageable pageable) {
 
         Page<AuditLog> logs;
 
