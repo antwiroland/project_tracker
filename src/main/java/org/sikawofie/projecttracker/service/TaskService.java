@@ -1,16 +1,16 @@
 package org.sikawofie.projecttracker.service;
 
-import jakarta.validation.constraints.Positive;
-import org.sikawofie.projecttracker.dto.TaskDTO;
+import org.sikawofie.projecttracker.dto.TaskRequestDTO;
+import org.sikawofie.projecttracker.dto.TaskResponseDTO;
 
 import java.util.List;
 
 public interface TaskService {
-    TaskDTO createTask(TaskDTO taskDTO);
-    TaskDTO assignTask(Long taskId, Long developerId);
+    TaskResponseDTO createTask(TaskRequestDTO taskDTO);
+    TaskResponseDTO assignTask(Long taskId, Long developerId);
     void deleteTask(Long taskId);
-    List<TaskDTO> getTasksByProjectId(Long projectId);
-    List<TaskDTO> getTasksByDeveloperId(Long developerId);
-    List<TaskDTO> getOverdueTasks();
-    List<TaskDTO> getTasksSorted(String sortBy);
+    List<TaskResponseDTO> getTasksByProjectId(Long projectId);
+    List<TaskResponseDTO> getTasksByDeveloperId(Long developerId);
+    List<TaskResponseDTO> getOverdueTasks();
+    List<TaskResponseDTO> getTasksSorted(String sortBy);
 }

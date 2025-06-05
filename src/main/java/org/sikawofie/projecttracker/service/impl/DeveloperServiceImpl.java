@@ -1,7 +1,8 @@
 package org.sikawofie.projecttracker.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.sikawofie.projecttracker.dto.DeveloperDTO;
+import org.sikawofie.projecttracker.dto.DeveloperRequestDTO;
+import org.sikawofie.projecttracker.dto.DeveloperResponseDTO;
 import org.sikawofie.projecttracker.entity.Developer;
 import org.sikawofie.projecttracker.exception.ResourceNotFoundException;
 import org.sikawofie.projecttracker.repository.DeveloperRepository;
@@ -20,14 +21,14 @@ public class DeveloperServiceImpl implements DeveloperService {
 
     @Override
     @CacheEvict(value = "developers", allEntries = true)
-    public DeveloperDTO createDeveloper(DeveloperDTO dto) {
+    public DeveloperResponseDTO createDeveloper(DeveloperRequestDTO dto) {
         Developer developer = mapToEntity(dto);
         return mapToDTO(developerRepository.save(developer));
     }
 
     @Override
     @CacheEvict(value = "developers", key = "#id")
-    public DeveloperDTO updateDeveloper(Long id, DeveloperDTO updatedDTO) {
+    public DeveloperResponseDTO updateDeveloper(Long id, DeveloperRequestDTO updatedDTO) {
         Developer existing = developerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Developer not found with ID: " + id));
 
@@ -49,21 +50,21 @@ public class DeveloperServiceImpl implements DeveloperService {
 
     @Override
     @Cacheable(value = "developers")
-    public Page<DeveloperDTO> getAllDevelopers(Pageable pageable) {
+    public Page<DeveloperResponseDTO> getAllDevelopers(Pageable pageable) {
         return developerRepository.findAll(pageable).map(this::mapToDTO);
     }
 
     @Override
     @Cacheable(value = "developers", key = "#id")
-    public DeveloperDTO getDeveloperById(Long id) {
+    public DeveloperResponseDTO getDeveloperById(Long id) {
         Developer developer = developerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Developer not found with ID: " + id));
         return mapToDTO(developer);
     }
 
     // Helper methods
-    private DeveloperDTO mapToDTO(Developer developer) {
-        DeveloperDTO dto = new DeveloperDTO();
+    private DeveloperResponseDTO mapToDTO(Developer developer) {
+        DeveloperResponseDTO dto = new DeveloperResponseDTO();
         dto.setId(developer.getId());
         dto.setName(developer.getName());
         dto.setEmail(developer.getEmail());
@@ -71,9 +72,8 @@ public class DeveloperServiceImpl implements DeveloperService {
         return dto;
     }
 
-    private Developer mapToEntity(DeveloperDTO dto) {
+    private Developer mapToEntity(DeveloperRequestDTO dto) {
         Developer developer = new Developer();
-        developer.setId(dto.getId());
         developer.setName(dto.getName());
         developer.setEmail(dto.getEmail());
         developer.setSkills(dto.getSkills());

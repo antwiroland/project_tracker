@@ -1,7 +1,8 @@
 package org.sikawofie.projecttracker.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.sikawofie.projecttracker.dto.TaskDTO;
+import org.sikawofie.projecttracker.dto.TaskRequestDTO;
+import org.sikawofie.projecttracker.dto.TaskResponseDTO;
 import org.sikawofie.projecttracker.entity.Developer;
 import org.sikawofie.projecttracker.entity.Project;
 import org.sikawofie.projecttracker.entity.Task;
@@ -28,7 +29,7 @@ public class TaskServiceImpl implements TaskService {
     private final ProjectRepository projectRepository;
 
     @Override
-    public TaskDTO createTask(TaskDTO dto) {
+    public TaskResponseDTO createTask(TaskRequestDTO dto) {
         Task task = mapToEntity(dto);
         Task savedTask = taskRepository.save(task);
         return mapToDTO(savedTask);
@@ -36,7 +37,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
-    public TaskDTO assignTask(Long taskId, Long developerId) {
+    public TaskResponseDTO assignTask(Long taskId, Long developerId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id " + taskId));
 
@@ -57,33 +58,33 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskDTO> getTasksByProjectId(Long projectId) {
+    public List<TaskResponseDTO> getTasksByProjectId(Long projectId) {
         return taskRepository.findByProjectId(projectId)
                 .stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
     @Override
-    public List<TaskDTO> getTasksByDeveloperId(Long developerId) {
+    public List<TaskResponseDTO> getTasksByDeveloperId(Long developerId) {
         return taskRepository.findByDeveloper_Id(developerId)
                 .stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
     @Override
-    public List<TaskDTO> getOverdueTasks() {
+    public List<TaskResponseDTO> getOverdueTasks() {
         return taskRepository.findByDueDateBeforeAndStatusNot(LocalDate.now(), TaskStatus.DONE)
                 .stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
     @Override
-    public List<TaskDTO> getTasksSorted(String sortBy) {
+    public List<TaskResponseDTO> getTasksSorted(String sortBy) {
         return taskRepository.findAll(Sort.by(Sort.Direction.ASC, sortBy))
                 .stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
     // Mapping methods
 
-    private TaskDTO mapToDTO(Task task) {
-        return TaskDTO.builder()
+    private TaskResponseDTO mapToDTO(Task task) {
+        return TaskResponseDTO.builder()
                 .id(task.getId())
                 .title(task.getTitle())
                 .description(task.getDescription())
@@ -94,10 +95,8 @@ public class TaskServiceImpl implements TaskService {
                 .build();
     }
 
-    private Task mapToEntity(TaskDTO dto) {
+    private Task mapToEntity(TaskRequestDTO dto) {
         Task task = new Task();
-
-        task.setId(dto.getId());
         task.setTitle(dto.getTitle());
         task.setDescription(dto.getDescription());
         task.setDueDate(dto.getDueDate());

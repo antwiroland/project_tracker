@@ -3,7 +3,8 @@ package org.sikawofie.projecttracker.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
-import org.sikawofie.projecttracker.dto.TaskDTO;
+import org.sikawofie.projecttracker.dto.TaskRequestDTO;
+import org.sikawofie.projecttracker.dto.TaskResponseDTO;
 import org.sikawofie.projecttracker.service.TaskService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -36,8 +37,8 @@ public class TaskController {
             @ApiResponse(responseCode = "201", description = "Task created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
-    public ResponseEntity<TaskDTO> createTask(@Valid @RequestBody TaskDTO taskDTO) {
-        TaskDTO savedTask = taskService.createTask(taskDTO);
+    public ResponseEntity<TaskResponseDTO> createTask(@Valid @RequestBody TaskRequestDTO taskDTO) {
+        TaskResponseDTO savedTask = taskService.createTask(taskDTO);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -56,10 +57,10 @@ public class TaskController {
             @ApiResponse(responseCode = "200", description = "Task assigned successfully"),
             @ApiResponse(responseCode = "404", description = "Invalid task or developer ID")
     })
-    public ResponseEntity<TaskDTO> assignTask(
+    public ResponseEntity<TaskResponseDTO> assignTask(
             @PathVariable Long taskId,
             @PathVariable Long developerId) {
-        TaskDTO updatedTask = taskService.assignTask(taskId, developerId);
+        TaskResponseDTO updatedTask = taskService.assignTask(taskId, developerId);
         return ResponseEntity.ok(updatedTask);
     }
 
@@ -86,8 +87,8 @@ public class TaskController {
             @ApiResponse(responseCode = "200", description = "List of tasks retrieved"),
             @ApiResponse(responseCode = "404", description = "Project not found")
     })
-    public ResponseEntity<List<TaskDTO>> getTasksByProject(@PathVariable Long projectId) {
-        List<TaskDTO> tasks = taskService.getTasksByProjectId(projectId);
+    public ResponseEntity<List<TaskResponseDTO>> getTasksByProject(@PathVariable Long projectId) {
+        List<TaskResponseDTO> tasks = taskService.getTasksByProjectId(projectId);
         return ResponseEntity.ok(tasks);
     }
 
@@ -100,8 +101,8 @@ public class TaskController {
             @ApiResponse(responseCode = "200", description = "List of tasks retrieved"),
             @ApiResponse(responseCode = "404", description = "Developer not found")
     })
-    public ResponseEntity<List<TaskDTO>> getTasksByDeveloper(@PathVariable Long developerId) {
-        List<TaskDTO> tasks = taskService.getTasksByDeveloperId(developerId);
+    public ResponseEntity<List<TaskResponseDTO>> getTasksByDeveloper(@PathVariable Long developerId) {
+        List<TaskResponseDTO> tasks = taskService.getTasksByDeveloperId(developerId);
         return ResponseEntity.ok(tasks);
     }
 
@@ -113,8 +114,8 @@ public class TaskController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of overdue tasks")
     })
-    public ResponseEntity<List<TaskDTO>> getOverdueTasks() {
-        List<TaskDTO> tasks = taskService.getOverdueTasks();
+    public ResponseEntity<List<TaskResponseDTO>> getOverdueTasks() {
+        List<TaskResponseDTO> tasks = taskService.getOverdueTasks();
         return ResponseEntity.ok(tasks);
     }
 
@@ -127,12 +128,12 @@ public class TaskController {
             @ApiResponse(responseCode = "200", description = "List of sorted tasks"),
             @ApiResponse(responseCode = "400", description = "Invalid sort field")
     })
-    public ResponseEntity<List<TaskDTO>> getTasksSorted(
+    public ResponseEntity<List<TaskResponseDTO>> getTasksSorted(
             @RequestParam
             @Pattern(regexp = "id|name|deadline|priority|status",
                     message = "sortBy must be one of: id, name, deadline, priority, status")
             String sortBy) {
-        List<TaskDTO> tasks = taskService.getTasksSorted(sortBy);
+        List<TaskResponseDTO> tasks = taskService.getTasksSorted(sortBy);
         return ResponseEntity.ok(tasks);
     }
 }

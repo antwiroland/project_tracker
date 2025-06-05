@@ -6,7 +6,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.sikawofie.projecttracker.dto.DeveloperDTO;
+import org.sikawofie.projecttracker.dto.DeveloperRequestDTO;
+import org.sikawofie.projecttracker.dto.DeveloperResponseDTO;
 import org.sikawofie.projecttracker.service.DeveloperService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,8 +28,8 @@ public class DeveloperController {
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     @PostMapping
-    public ResponseEntity<DeveloperDTO> createDeveloper(@Valid @RequestBody DeveloperDTO developerDTO) {
-        DeveloperDTO createdDeveloper = developerService.createDeveloper(developerDTO);
+    public ResponseEntity<DeveloperResponseDTO> createDeveloper(@Valid @RequestBody DeveloperRequestDTO developerDTO) {
+        DeveloperResponseDTO createdDeveloper = developerService.createDeveloper(developerDTO);
         return ResponseEntity.status(201).body(createdDeveloper);
     }
 
@@ -39,10 +40,10 @@ public class DeveloperController {
             @ApiResponse(responseCode = "404", description = "Developer not found with given ID")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<DeveloperDTO> updateDeveloper(
+    public ResponseEntity<DeveloperResponseDTO> updateDeveloper(
             @PathVariable Long id,
-            @Valid @RequestBody DeveloperDTO developerDTO) {
-        DeveloperDTO updatedDeveloper = developerService.updateDeveloper(id, developerDTO);
+            @Valid @RequestBody DeveloperRequestDTO developerDTO) {
+        DeveloperResponseDTO updatedDeveloper = developerService.updateDeveloper(id, developerDTO);
         return ResponseEntity.ok(updatedDeveloper);
     }
 
@@ -62,8 +63,8 @@ public class DeveloperController {
             @ApiResponse(responseCode = "200", description = "List of developers retrieved successfully")
     })
     @GetMapping
-    public ResponseEntity<Page<DeveloperDTO>> getAllDevelopers(Pageable pageable) {
-        Page<DeveloperDTO> developers = developerService.getAllDevelopers(pageable);
+    public ResponseEntity<Page<DeveloperResponseDTO>> getAllDevelopers(Pageable pageable) {
+        Page<DeveloperResponseDTO> developers = developerService.getAllDevelopers(pageable);
         return ResponseEntity.ok(developers);
     }
 
@@ -73,8 +74,8 @@ public class DeveloperController {
             @ApiResponse(responseCode = "404", description = "Developer not found with given ID")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<DeveloperDTO> getDeveloperById(@PathVariable Long id) {
-        DeveloperDTO developerDTO = developerService.getDeveloperById(id);
+    public ResponseEntity<DeveloperResponseDTO> getDeveloperById(@PathVariable Long id) {
+        DeveloperResponseDTO developerDTO = developerService.getDeveloperById(id);
         return ResponseEntity.ok(developerDTO);
     }
 }

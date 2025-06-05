@@ -1,13 +1,14 @@
 package org.sikawofie.projecttracker.service;
 
-import org.sikawofie.projecttracker.dto.ProjectDTO;
+import org.sikawofie.projecttracker.dto.ProjectRequestDTO;
+import org.sikawofie.projecttracker.dto.ProjectResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ProjectService {
-    ProjectDTO createProject(ProjectDTO projectDTO);
-    ProjectDTO updateProject(Long id, ProjectDTO updatedDTO);
+    ProjectResponseDTO createProject(ProjectRequestDTO projectDTO);
+    ProjectResponseDTO updateProject(Long id, ProjectRequestDTO updatedDTO);
     void deleteProject(Long id);
-    ProjectDTO getProjectById(Long id);
-    Page<ProjectDTO> getAllProjects(Pageable pageable);
+    ProjectResponseDTO getProjectById(Long id);
+    Page<ProjectResponseDTO> getAllProjects(Pageable pageable);
 }

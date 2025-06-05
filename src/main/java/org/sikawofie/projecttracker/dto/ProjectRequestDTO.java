@@ -3,7 +3,6 @@ package org.sikawofie.projecttracker.dto;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-
 import org.sikawofie.projecttracker.enums.ProjectStatus;
 
 import java.time.LocalDate;
@@ -13,10 +12,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProjectDTO {
-
-    private Long id;
-
+public class ProjectRequestDTO {
     @NotNull(message = "Project name is required")
     @Size(min = 2, max = 100, message = "Project name must be between 2 and 100 characters")
     private String name;
