@@ -4,9 +4,11 @@ The **Project Tracker** is a Spring Boot application designed to manage software
 
 ---
 
-## 📐 Architecture Diagram (Conceptual)
+## 🧩 Component Diagram
 
-*Note: Actual diagram not included. The architecture consists of layered components: Entity, DTO, Repository, Service, Controller, and external MongoDB for auditing.*
+![Component Diagram](Component-Diagram.svg)
+
+* The architecture consists of layered components: Entity, DTO, Repository, Service, Controller, and external MongoDB for auditing.*
 
 ---
 
@@ -29,7 +31,7 @@ Used to transfer data between different application layers:
 
 - `ProjectRequestDTO` / `ProjectResponseDTO`
 - `DeveloperRequestDTO` / `DeveloperResponseDTO`
-- *(Presumably)* `TaskRequestDTO` / `TaskResponseDTO`
+- `TaskRequestDTO` / `TaskResponseDTO`
 
 ---
 
@@ -54,7 +56,7 @@ Handles business logic and includes caching:
 
 ---
 
-### 5. Controller Layer *(Assumed)*
+### 5. Controller Layer
 
 Exposes REST API endpoints to interact with the service layer. Enables clients to perform CRUD operations on projects, developers, and tasks.
 
@@ -109,11 +111,6 @@ Uses **Jakarta Bean Validation** (`jakarta.validation.constraints`) on entity fi
 
 ---
 
-## 🧩 Component Diagram
-
-![Component Diagram](Component-Diagram.svg)
-
-
 ## 🏃‍♂️ How to Run
 
 1. Clone the repository:
@@ -135,6 +132,4 @@ Uses **Jakarta Bean Validation** (`jakarta.validation.constraints`) on entity fi
 - Expand **AuditLog** to include request metadata:
     - IP Address
     - Request Headers
-- Add **unit** and **integration** tests.
-
 ---
