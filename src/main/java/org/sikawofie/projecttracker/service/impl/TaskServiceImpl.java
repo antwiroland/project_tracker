@@ -44,7 +44,7 @@ public class TaskServiceImpl implements TaskService {
         Developer developer = developerRepository.findById(developerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Developer not found with id " + developerId));
 
-        task.setDeveloper(developer);  // assign single developer
+        task.setDeveloper(developer);
         Task updated = taskRepository.save(task);
         return mapToDTO(updated);
     }
@@ -60,29 +60,36 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<TaskResponseDTO> getTasksByProjectId(Long projectId) {
         return taskRepository.findByProjectId(projectId)
-                .stream().map(this::mapToDTO).collect(Collectors.toList());
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<TaskResponseDTO> getTasksByDeveloperId(Long developerId) {
         return taskRepository.findByDeveloper_Id(developerId)
-                .stream().map(this::mapToDTO).collect(Collectors.toList());
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<TaskResponseDTO> getOverdueTasks() {
         return taskRepository.findByDueDateBeforeAndStatusNot(LocalDate.now(), TaskStatus.DONE)
-                .stream().map(this::mapToDTO).collect(Collectors.toList());
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<TaskResponseDTO> getTasksSorted(String sortBy) {
         return taskRepository.findAll(Sort.by(Sort.Direction.ASC, sortBy))
-                .stream().map(this::mapToDTO).collect(Collectors.toList());
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     // Mapping methods
-
     private TaskResponseDTO mapToDTO(Task task) {
         return TaskResponseDTO.builder()
                 .id(task.getId())

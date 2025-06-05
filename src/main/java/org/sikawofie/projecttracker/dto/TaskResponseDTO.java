@@ -1,13 +1,17 @@
 package org.sikawofie.projecttracker.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.sikawofie.projecttracker.enums.TaskStatus;
 
 import java.time.LocalDate;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TaskResponseDTO {
     private Long id;
     private String title;
