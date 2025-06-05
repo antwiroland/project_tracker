@@ -17,9 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +43,7 @@ public class TaskServiceImpl implements TaskService {
         Developer developer = developerRepository.findById(developerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Developer not found with id " + developerId));
 
-        task.addDeveloper(developer);
+        task.setDeveloper(developer);  // assign single developer
         Task updated = taskRepository.save(task);
         return mapToDTO(updated);
     }
@@ -66,7 +64,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<TaskDTO> getTasksByDeveloperId(Long developerId) {
-        return taskRepository.findByDevelopers_Id(developerId)
+        return taskRepository.findByDeveloper_Id(developerId)
                 .stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
@@ -82,12 +80,9 @@ public class TaskServiceImpl implements TaskService {
                 .stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
-    // Mapping Methods
+    // Mapping methods
 
     private TaskDTO mapToDTO(Task task) {
-        Set<Long> developerIds = task.getDevelopers().stream()
-                .map(Developer::getId).collect(Collectors.toSet());
-
         return TaskDTO.builder()
                 .id(task.getId())
                 .title(task.getTitle())
@@ -95,7 +90,7 @@ public class TaskServiceImpl implements TaskService {
                 .dueDate(task.getDueDate())
                 .status(task.getStatus())
                 .projectId(task.getProject().getId())
-                .developerIds(developerIds)
+                .developerId(task.getDeveloper() != null ? task.getDeveloper().getId() : null)
                 .build();
     }
 
@@ -112,12 +107,12 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id " + dto.getProjectId()));
         task.setProject(project);
 
-        if (dto.getDeveloperIds() != null && !dto.getDeveloperIds().isEmpty()) {
-            Set<Developer> developers = dto.getDeveloperIds().stream()
-                    .map(id -> developerRepository.findById(id)
-                            .orElseThrow(() -> new ResourceNotFoundException("Developer not found with id " + id)))
-                    .collect(Collectors.toSet());
-            task.setDevelopers(developers);
+        if (dto.getDeveloperId() != null) {
+            Developer developer = developerRepository.findById(dto.getDeveloperId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Developer not found with id " + dto.getDeveloperId()));
+            task.setDeveloper(developer);
+        } else {
+            task.setDeveloper(null);
         }
 
         return task;
