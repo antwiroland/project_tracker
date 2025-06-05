@@ -64,11 +64,11 @@ class DeveloperControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Alice"))
-                .andExpect(jsonPath("$.email").value("alice@example.com"))
-                .andExpect(jsonPath("$.skills[0]").value("Java"))
-                .andExpect(jsonPath("$.skills[1]").value("Spring"));
+                .andExpect(jsonPath("$.data.id").value(1L))
+                .andExpect(jsonPath("$.data.name").value("Alice"))
+                .andExpect(jsonPath("$.data.email").value("alice@example.com"))
+                .andExpect(jsonPath("$.data.skills[0]").value("Java"))
+                .andExpect(jsonPath("$.data.skills[1]").value("Spring"));
     }
 
     @Test
@@ -91,11 +91,11 @@ class DeveloperControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(2L))
-                .andExpect(jsonPath("$.name").value("Bob"))
-                .andExpect(jsonPath("$.email").value("bob@example.com"))
-                .andExpect(jsonPath("$.skills[0]").value("Python"))
-                .andExpect(jsonPath("$.skills[1]").value("Django"));
+                .andExpect(jsonPath("$.data.id").value(2L))
+                .andExpect(jsonPath("$.data.name").value("Bob"))
+                .andExpect(jsonPath("$.data.email").value("bob@example.com"))
+                .andExpect(jsonPath("$.data.skills[0]").value("Python"))
+                .andExpect(jsonPath("$.data.skills[1]").value("Django"));
     }
 
     @Test
@@ -118,11 +118,11 @@ class DeveloperControllerTest {
 
         mockMvc.perform(get("/api/developers/4"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(4L))
-                .andExpect(jsonPath("$.name").value("Charlie"))
-                .andExpect(jsonPath("$.email").value("charlie@example.com"))
-                .andExpect(jsonPath("$.skills[0]").value("JavaScript"))
-                .andExpect(jsonPath("$.skills[1]").value("React"));
+                .andExpect(jsonPath("$.data.id").value(4L))
+                .andExpect(jsonPath("$.data.name").value("Charlie"))
+                .andExpect(jsonPath("$.data.email").value("charlie@example.com"))
+                .andExpect(jsonPath("$.data.skills[0]").value("JavaScript"))
+                .andExpect(jsonPath("$.data.skills[1]").value("React"));
     }
 
     @Test
@@ -145,14 +145,14 @@ class DeveloperControllerTest {
 
         mockMvc.perform(get("/api/developers?page=0&size=2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(2))
-                .andExpect(jsonPath("$.content[0].name").value("Alice"))
-                .andExpect(jsonPath("$.content[0].email").value("alice@example.com"))
-                .andExpect(jsonPath("$.content[0].skills[0]").value("Java"))
-                .andExpect(jsonPath("$.content[0].skills[1]").value("Spring"))
-                .andExpect(jsonPath("$.content[1].name").value("Bob"))
-                .andExpect(jsonPath("$.content[1].email").value("bob@example.com"))
-                .andExpect(jsonPath("$.content[1].skills[0]").value("Python"))
-                .andExpect(jsonPath("$.content[1].skills[1]").value("Django"));
+                .andExpect(jsonPath("$.data.content.length()").value(2))
+                .andExpect(jsonPath("$.data.content[0].name").value("Alice"))
+                .andExpect(jsonPath("$.data.content[0].email").value("alice@example.com"))
+                .andExpect(jsonPath("$.data.content[0].skills[0]").value("Java"))
+                .andExpect(jsonPath("$.data.content[0].skills[1]").value("Spring"))
+                .andExpect(jsonPath("$.data.content[1].name").value("Bob"))
+                .andExpect(jsonPath("$.data.content[1].email").value("bob@example.com"))
+                .andExpect(jsonPath("$.data.content[1].skills[0]").value("Python"))
+                .andExpect(jsonPath("$.data.content[1].skills[1]").value("Django"));
     }
 }
