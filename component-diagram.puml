@@ -1,0 +1,48 @@
+@startuml
+title Project Tracker - Component Diagram
+
+actor "REST API Clients / Frontend" as Client
+
+package "Web Layer" {
+    [Controller Layer]
+}
+
+package "Service Layer" {
+    [ProjectService]
+    [DeveloperService]
+    [TaskService]
+    [AuditLogService]
+}
+
+package "Repository Layer" {
+    [ProjectRepository]
+    [DeveloperRepository]
+    [TaskRepository]
+    [AuditLogRepository]
+}
+
+database "RDBMS\n(MySQL/PostgreSQL)" as RDBMS
+database "MongoDB" as MongoDB
+
+' Connections
+Client --> [Controller Layer]
+[Controller Layer] --> [ProjectService]
+[Controller Layer] --> [DeveloperService]
+[Controller Layer] --> [TaskService]
+
+[ProjectService] --> [ProjectRepository]
+[DeveloperService] --> [DeveloperRepository]
+[TaskService] --> [TaskRepository]
+
+[ProjectService] --> [AuditLogService]
+[DeveloperService] --> [AuditLogService]
+[TaskService] --> [AuditLogService]
+
+[AuditLogService] --> [AuditLogRepository]
+
+[ProjectRepository] --> RDBMS
+[DeveloperRepository] --> RDBMS
+[TaskRepository] --> RDBMS
+[AuditLogRepository] --> MongoDB
+
+@enduml
