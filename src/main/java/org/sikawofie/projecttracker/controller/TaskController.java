@@ -109,31 +109,30 @@ public class TaskController {
     @GetMapping("/overdue")
     @Operation(
             summary = "Get overdue tasks",
-            description = "Retrieves all tasks that are overdue"
+            description = "Retrieves all tasks that are overdue and not completed"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of overdue tasks")
+            @ApiResponse(responseCode = "200", description = "List of overdue tasks retrieved")
     })
     public ResponseEntity<List<TaskResponseDTO>> getOverdueTasks() {
-        List<TaskResponseDTO> tasks = taskService.getOverdueTasks();
-        return ResponseEntity.ok(tasks);
+        List<TaskResponseDTO> overdueTasks = taskService.getOverdueTasks();
+        return ResponseEntity.ok(overdueTasks);
     }
 
-    @GetMapping("/sorted")
+    @GetMapping("/sort")
     @Operation(
-            summary = "Get sorted tasks",
-            description = "Retrieves tasks sorted by the specified field"
+            summary = "Get tasks sorted by field",
+            description = "Retrieves all tasks sorted by the specified field"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of sorted tasks"),
-            @ApiResponse(responseCode = "400", description = "Invalid sort field")
+            @ApiResponse(responseCode = "200", description = "List of sorted tasks retrieved"),
+            @ApiResponse(responseCode = "400", description = "Invalid sort parameter")
     })
     public ResponseEntity<List<TaskResponseDTO>> getTasksSorted(
             @RequestParam
-            @Pattern(regexp = "id|name|deadline|priority|status",
-                    message = "sortBy must be one of: id, name, deadline, priority, status")
+            @Pattern(regexp = "title|status|dueDate|project.id|developer.id", message = "Invalid sort parameter")
             String sortBy) {
-        List<TaskResponseDTO> tasks = taskService.getTasksSorted(sortBy);
-        return ResponseEntity.ok(tasks);
+        List<TaskResponseDTO> sortedTasks = taskService.getTasksSorted(sortBy);
+        return ResponseEntity.ok(sortedTasks);
     }
 }

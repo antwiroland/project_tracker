@@ -14,6 +14,5 @@ public class DeveloperResponseDTO {
     private Long id;
     private String name;
     private String email;
-
     private List<String> skills;
 }
