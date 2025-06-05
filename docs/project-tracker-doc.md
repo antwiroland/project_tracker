@@ -118,7 +118,7 @@ Uses **Jakarta Bean Validation** (`jakarta.validation.constraints`) on entity fi
 
 1. Clone the repository:
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/antwiroland/project_tracker.git
     ```
 2. Configure `application.properties` for your RDBMS and MongoDB.
 3. Start MongoDB and your relational database.
