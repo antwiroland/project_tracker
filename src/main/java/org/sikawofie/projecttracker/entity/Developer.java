@@ -32,17 +32,7 @@ public class Developer {
     @Column(name = "skill")
     private List<String> skills = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "developers", fetch = FetchType.LAZY)
+
+    @OneToMany(mappedBy = "developer", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Task> tasks = new HashSet<>();
-
-
-    public void addTask(Task task) {
-        this.tasks.add(task);
-        task.getDevelopers().add(this);
-    }
-
-    public void removeTask(Task task) {
-        this.tasks.remove(task);
-        task.getDevelopers().remove(this);
-    }
 }
