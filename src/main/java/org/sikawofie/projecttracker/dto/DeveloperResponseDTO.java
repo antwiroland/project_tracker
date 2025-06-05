@@ -9,13 +9,10 @@ import java.util.List;
 
 @Getter
 @Setter
-public class DeveloperDTO {
+public class DeveloperResponseDTO {
+
     private Long id;
-
-    @NotBlank(message = "Developer name is required")
     private String name;
-
-    @Email(message = "Must be a valid email")
     private String email;
 
     private List<String> skills;
