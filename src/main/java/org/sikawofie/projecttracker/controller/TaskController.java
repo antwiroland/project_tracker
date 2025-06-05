@@ -1,54 +1,61 @@
 package org.sikawofie.projecttracker.controller;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.sikawofie.projecttracker.dto.TaskDTO;
 import org.sikawofie.projecttracker.service.TaskService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-
-import jakarta.validation.Valid;
+import java.net.URI;
 import java.util.List;
-
 
 @RestController
 @RequestMapping("/api/tasks")
 @RequiredArgsConstructor
 @Tag(name = "Task Controller", description = "CRUD operations for tasks")
+@Validated
 public class TaskController {
 
     private final TaskService taskService;
 
-
     @PostMapping
     @Operation(
             summary = "Create a new task",
-            description = "Creates a task using the provided TaskDTO object"
+            description = "Creates a new task using the provided TaskDTO"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Task created successfully"),
+            @ApiResponse(responseCode = "201", description = "Task created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     public ResponseEntity<TaskDTO> createTask(@Valid @RequestBody TaskDTO taskDTO) {
         TaskDTO savedTask = taskService.createTask(taskDTO);
-        return ResponseEntity.ok(savedTask);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(savedTask.getId())
+                .toUri();
+
+        return ResponseEntity.created(location).body(savedTask);
     }
 
-
+    @PutMapping("/{taskId}/assign/{developerId}")
     @Operation(
-            summary = "Update an existing task",
-            description = "Update a task using the provide TaskDTO object"
+            summary = "Assign a task to a developer",
+            description = "Assigns the task with the given ID to the developer with the given ID"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Task updated successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input data")
+            @ApiResponse(responseCode = "200", description = "Task assigned successfully"),
+            @ApiResponse(responseCode = "404", description = "Invalid task or developer ID")
     })
-    @PutMapping("/{taskId}/assign/{developerId}")
     public ResponseEntity<TaskDTO> assignTask(
             @PathVariable Long taskId,
             @PathVariable Long developerId) {
@@ -56,67 +63,76 @@ public class TaskController {
         return ResponseEntity.ok(updatedTask);
     }
 
+    @DeleteMapping("/{id}")
     @Operation(
             summary = "Delete a task",
-            description = "Delete a task with the provided id of type long"
+            description = "Deletes the task with the specified ID"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Task deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Task with provided id not found")
+            @ApiResponse(responseCode = "204", description = "Task deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Task not found")
     })
-    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
         taskService.deleteTask(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(
-            summary = "Returns a taskDTO",
-            description = "Returns a taskDTO with the provided id of type long"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "TaskDTO Object"),
-            @ApiResponse(responseCode = "404", description = "Task with provided project id not found")
-    })
     @GetMapping("/project/{projectId}")
+    @Operation(
+            summary = "Get tasks by project ID",
+            description = "Retrieves all tasks associated with the specified project ID"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of tasks retrieved"),
+            @ApiResponse(responseCode = "404", description = "Project not found")
+    })
     public ResponseEntity<List<TaskDTO>> getTasksByProject(@PathVariable Long projectId) {
-        return ResponseEntity.ok(taskService.getTasksByProjectId(projectId));
+        List<TaskDTO> tasks = taskService.getTasksByProjectId(projectId);
+        return ResponseEntity.ok(tasks);
     }
 
-    @Operation(
-            summary = "Returns a taskDTO",
-            description = "Returns a taskDTO with the provided developer of type long"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "TaskDTO Object"),
-            @ApiResponse(responseCode = "404", description = "Task with developer project id not found")
-    })
     @GetMapping("/developer/{developerId}")
+    @Operation(
+            summary = "Get tasks by developer ID",
+            description = "Retrieves all tasks assigned to the specified developer"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of tasks retrieved"),
+            @ApiResponse(responseCode = "404", description = "Developer not found")
+    })
     public ResponseEntity<List<TaskDTO>> getTasksByDeveloper(@PathVariable Long developerId) {
-        return ResponseEntity.ok(taskService.getTasksByDeveloperId(developerId));
+        List<TaskDTO> tasks = taskService.getTasksByDeveloperId(developerId);
+        return ResponseEntity.ok(tasks);
     }
 
-    @Operation(
-            summary = "Returns taskDTO objects",
-            description = "Returns a taskDTO objects with overdue date"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "TaskDTO Objects"),
-    })
     @GetMapping("/overdue")
-    public ResponseEntity<List<TaskDTO>> getOverdueTasks() {
-        return ResponseEntity.ok(taskService.getOverdueTasks());
-    }
-
     @Operation(
-            summary = "Returns taskDTO objects",
-            description = "Returns a sorted taskDTO objects"
+            summary = "Get overdue tasks",
+            description = "Retrieves all tasks that are overdue"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "TaskDTO Objects"),
+            @ApiResponse(responseCode = "200", description = "List of overdue tasks")
     })
+    public ResponseEntity<List<TaskDTO>> getOverdueTasks() {
+        List<TaskDTO> tasks = taskService.getOverdueTasks();
+        return ResponseEntity.ok(tasks);
+    }
+
     @GetMapping("/sorted")
-    public ResponseEntity<List<TaskDTO>> getTasksSorted(@RequestParam String sortBy) {
-        return ResponseEntity.ok(taskService.getTasksSorted(sortBy));
+    @Operation(
+            summary = "Get sorted tasks",
+            description = "Retrieves tasks sorted by the specified field"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of sorted tasks"),
+            @ApiResponse(responseCode = "400", description = "Invalid sort field")
+    })
+    public ResponseEntity<List<TaskDTO>> getTasksSorted(
+            @RequestParam
+            @Pattern(regexp = "id|name|deadline|priority|status",
+                    message = "sortBy must be one of: id, name, deadline, priority, status")
+            String sortBy) {
+        List<TaskDTO> tasks = taskService.getTasksSorted(sortBy);
+        return ResponseEntity.ok(tasks);
     }
 }

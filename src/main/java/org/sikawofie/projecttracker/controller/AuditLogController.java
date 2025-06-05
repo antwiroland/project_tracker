@@ -30,7 +30,7 @@ public class AuditLogController {
     @GetMapping
     @Operation(
             summary = "Get audit logs (non-paged)",
-            description = "Retrieves a list of audit logs filtered by optional parameters: entityType and actorName"
+            description = "Retrieve a list of audit logs filtered by optional parameters: entityType and actorName"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved list of audit logs")
@@ -61,7 +61,7 @@ public class AuditLogController {
     @GetMapping("/paged")
     @Operation(
             summary = "Get audit logs (paged)",
-            description = "Retrieves a paginated list of audit logs, with optional filters for entityType and actorName"
+            description = "Retrieve a paginated list of audit logs with optional filters for entityType and actorName"
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved paginated audit logs")
