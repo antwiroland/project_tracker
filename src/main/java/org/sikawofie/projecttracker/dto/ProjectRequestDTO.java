@@ -8,11 +8,10 @@ import org.sikawofie.projecttracker.enums.ProjectStatus;
 
 import java.time.LocalDate;
 
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ProjectRequestDTO {
 
     @NotBlank(message = "Project name is required")

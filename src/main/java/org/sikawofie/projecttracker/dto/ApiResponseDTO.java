@@ -1,11 +1,10 @@
 package org.sikawofie.projecttracker.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 @Data
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 public class ApiResponseDTO<T> {
     private int status;
