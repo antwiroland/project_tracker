@@ -27,11 +27,22 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final DeveloperRepository developerRepository;
     private final ProjectRepository projectRepository;
+    private final AuditLogService auditLogService;
 
     @Override
     public TaskResponseDTO createTask(TaskRequestDTO dto) {
         Task task = mapToEntity(dto);
         Task savedTask = taskRepository.save(task);
+
+        // Log creation
+        auditLogService.logAction(
+                "CREATE",
+                "Task",
+                savedTask.getId().toString(),
+                savedTask,
+                "SYSTEM"
+        );
+
         return mapToDTO(savedTask);
     }
 
@@ -46,15 +57,34 @@ public class TaskServiceImpl implements TaskService {
 
         task.setDeveloper(developer);
         Task updated = taskRepository.save(task);
+
+        // Log assignment
+        auditLogService.logAction(
+                "UPDATE",
+                "Task",
+                updated.getId().toString(),
+                updated,
+                "SYSTEM"
+        );
+
         return mapToDTO(updated);
     }
 
     @Override
     public void deleteTask(Long taskId) {
-        if (!taskRepository.existsById(taskId)) {
-            throw new ResourceNotFoundException("Task not found with id " + taskId);
-        }
-        taskRepository.deleteById(taskId);
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id " + taskId));
+
+        taskRepository.delete(task);
+
+        // Log deletion
+        auditLogService.logAction(
+                "DELETE",
+                "Task",
+                task.getId().toString(),
+                task,
+                "SYSTEM"
+        );
     }
 
     @Override

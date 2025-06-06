@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.sikawofie.projecttracker.dto.ApiResponseDTO;
 import org.sikawofie.projecttracker.dto.ProjectRequestDTO;
 import org.sikawofie.projecttracker.dto.ProjectResponseDTO;
 import org.sikawofie.projecttracker.service.ProjectService;
@@ -33,16 +34,21 @@ public class ProjectController {
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     @PostMapping
-    public ResponseEntity<ProjectResponseDTO> createProject(@Valid @RequestBody ProjectRequestDTO projectDTO) {
+    public ResponseEntity<ApiResponseDTO<ProjectResponseDTO>> createProject(@Valid @RequestBody ProjectRequestDTO projectDTO) {
         ProjectResponseDTO createdProject = projectService.createProject(projectDTO);
-        System.out.println("Project created: " + createdProject);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(createdProject.getId())
                 .toUri();
 
-        return ResponseEntity.created(location).body(createdProject);
+        ApiResponseDTO<ProjectResponseDTO> response = ApiResponseDTO.<ProjectResponseDTO>builder()
+                .status(201)
+                .message("Project created successfully")
+                .data(createdProject)
+                .build();
+
+        return ResponseEntity.created(location).body(response);
     }
 
     @Operation(summary = "Update a project", description = "Update an existing project identified by ID using the provided ProjectDTO")
@@ -52,11 +58,18 @@ public class ProjectController {
             @ApiResponse(responseCode = "404", description = "Project not found with provided ID")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<ProjectResponseDTO> updateProject(
+    public ResponseEntity<ApiResponseDTO<ProjectResponseDTO>> updateProject(
             @PathVariable Long id,
             @Valid @RequestBody ProjectRequestDTO projectDTO) {
         ProjectResponseDTO updatedProject = projectService.updateProject(id, projectDTO);
-        return ResponseEntity.ok(updatedProject);
+
+        ApiResponseDTO<ProjectResponseDTO> response = ApiResponseDTO.<ProjectResponseDTO>builder()
+                .status(200)
+                .message("Project updated successfully")
+                .data(updatedProject)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Delete a project", description = "Delete the project with the specified ID")
@@ -65,9 +78,15 @@ public class ProjectController {
             @ApiResponse(responseCode = "404", description = "Project not found with provided ID")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProject(@PathVariable Long id) {
+    public ResponseEntity<ApiResponseDTO<Void>> deleteProject(@PathVariable Long id) {
         projectService.deleteProject(id);
-        return ResponseEntity.noContent().build();
+
+        ApiResponseDTO<Void> response = ApiResponseDTO.<Void>builder()
+                .status(204)
+                .message("Project deleted successfully")
+                .build();
+
+        return ResponseEntity.status(204).body(response);
     }
 
     @Operation(summary = "Get a project by ID", description = "Retrieve a project using the provided ID")
@@ -76,9 +95,16 @@ public class ProjectController {
             @ApiResponse(responseCode = "404", description = "Project not found with provided ID")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectResponseDTO> getProjectById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponseDTO<ProjectResponseDTO>> getProjectById(@PathVariable Long id) {
         ProjectResponseDTO projectDTO = projectService.getProjectById(id);
-        return ResponseEntity.ok(projectDTO);
+
+        ApiResponseDTO<ProjectResponseDTO> response = ApiResponseDTO.<ProjectResponseDTO>builder()
+                .status(200)
+                .message("Project retrieved successfully")
+                .data(projectDTO)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Get all projects", description = "Retrieve a paginated list of all projects")
@@ -86,8 +112,15 @@ public class ProjectController {
             @ApiResponse(responseCode = "200", description = "List of projects retrieved successfully")
     })
     @GetMapping
-    public ResponseEntity<Page<ProjectResponseDTO>> getAllProjects(Pageable pageable) {
+    public ResponseEntity<ApiResponseDTO<Page<ProjectResponseDTO>>> getAllProjects(Pageable pageable) {
         Page<ProjectResponseDTO> projects = projectService.getAllProjects(pageable);
-        return ResponseEntity.ok(projects);
+
+        ApiResponseDTO<Page<ProjectResponseDTO>> response = ApiResponseDTO.<Page<ProjectResponseDTO>>builder()
+                .status(200)
+                .message("Projects retrieved successfully")
+                .data(projects)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 }

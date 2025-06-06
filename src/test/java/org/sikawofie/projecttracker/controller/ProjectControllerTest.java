@@ -26,14 +26,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ProjectController.class)
-@Import(ProjectControllerTest.TestConfig.class)  // Import config that defines mocked ProjectService bean
+@Import(ProjectControllerTest.TestConfig.class)
 class ProjectControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private ProjectService projectService;  // Mocked bean from TestConfig
+    private ProjectService projectService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -69,9 +69,9 @@ class ProjectControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("New Project"))
-                .andExpect(jsonPath("$.description").value("Project Description"));
+                .andExpect(jsonPath("$.data.id").value(1L))
+                .andExpect(jsonPath("$.data.name").value("New Project"))
+                .andExpect(jsonPath("$.data.description").value("Project Description"));
     }
 
     @Test
@@ -97,8 +97,8 @@ class ProjectControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Updated Project"))
-                .andExpect(jsonPath("$.description").value("Updated Desc"));
+                .andExpect(jsonPath("$.data.name").value("Updated Project"))
+                .andExpect(jsonPath("$.data.description").value("Updated Desc"));
     }
 
     @Test
@@ -123,9 +123,9 @@ class ProjectControllerTest {
 
         mockMvc.perform(get("/api/projects/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Demo Project"))
-                .andExpect(jsonPath("$.description").value("Desc"));
+                .andExpect(jsonPath("$.data.id").value(1L))
+                .andExpect(jsonPath("$.data.name").value("Demo Project"))
+                .andExpect(jsonPath("$.data.description").value("Desc"));
     }
 
     @Test
@@ -152,8 +152,8 @@ class ProjectControllerTest {
 
         mockMvc.perform(get("/api/projects?page=0&size=2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(2))
-                .andExpect(jsonPath("$.content[0].name").value("Project A"))
-                .andExpect(jsonPath("$.content[1].name").value("Project B"));
+                .andExpect(jsonPath("$.data.content.length()").value(2))
+                .andExpect(jsonPath("$.data.content[0].name").value("Project A"))
+                .andExpect(jsonPath("$.data.content[1].name").value("Project B"));
     }
 }

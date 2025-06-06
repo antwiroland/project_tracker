@@ -18,12 +18,23 @@ import org.springframework.stereotype.Service;
 public class DeveloperServiceImpl implements DeveloperService {
 
     private final DeveloperRepository developerRepository;
+    private final AuditLogService auditLogService;
 
     @Override
     @CacheEvict(value = "developers", allEntries = true)
     public DeveloperResponseDTO createDeveloper(DeveloperRequestDTO dto) {
         Developer developer = mapToEntity(dto);
-        return mapToDTO(developerRepository.save(developer));
+        Developer saved = developerRepository.save(developer);
+
+        auditLogService.logAction(
+                "CREATE",
+                "Developer",
+                saved.getId().toString(),
+                saved,
+                "SYSTEM"
+        );
+
+        return mapToDTO(saved);
     }
 
     @Override
@@ -36,16 +47,34 @@ public class DeveloperServiceImpl implements DeveloperService {
         existing.setEmail(updatedDTO.getEmail());
         existing.setSkills(updatedDTO.getSkills());
 
-        return mapToDTO(developerRepository.save(existing));
+        Developer updated = developerRepository.save(existing);
+
+        auditLogService.logAction(
+                "UPDATE",
+                "Developer",
+                updated.getId().toString(),
+                updated,
+                "SYSTEM"
+        );
+
+        return mapToDTO(updated);
     }
 
     @Override
     @CacheEvict(value = "developers", key = "#id")
     public void deleteDeveloper(Long id) {
-        if (!developerRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Developer not found with ID: " + id);
-        }
-        developerRepository.deleteById(id);
+        Developer developer = developerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Developer not found with ID: " + id));
+
+        developerRepository.delete(developer);
+
+        auditLogService.logAction(
+                "DELETE",
+                "Developer",
+                developer.getId().toString(),
+                developer,
+                "SYSTEM"
+        );
     }
 
     @Override
