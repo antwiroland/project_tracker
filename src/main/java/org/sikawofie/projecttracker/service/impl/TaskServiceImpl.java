@@ -40,7 +40,7 @@ public class TaskServiceImpl implements TaskService {
                 "Task",
                 savedTask.getId().toString(),
                 savedTask,
-                "SYSTEM" // Replace with actual user/actor if available
+                "SYSTEM"
         );
 
         return mapToDTO(savedTask);

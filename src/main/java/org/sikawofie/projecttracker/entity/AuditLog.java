@@ -13,12 +13,12 @@ import java.time.Instant;
 @Builder
 public class AuditLog {
     @Id
-    private String id; // MongoDB ObjectId as a string
+    private String id;
 
-    private String actionType;   // e.g. CREATE, UPDATE, DELETE
-    private String entityType;   // e.g. "Project", "Developer"
-    private String entityId;     // Typically the ID of the target entity (String allows UUIDs or DB-generated IDs)
-    private String actorName;    // Who performed the action (could be a username or system)
-    private String payload;      // Optional: JSON payload for what changed (e.g. old/new values)
-    private Instant timestamp;   // Time the action occurred
+    private String actionType;
+    private String entityType;
+    private String entityId;
+    private String actorName;
+    private String payload;
+    private Instant timestamp;
 }
