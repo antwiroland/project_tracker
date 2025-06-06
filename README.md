@@ -13,6 +13,9 @@ The **Project Tracker** is a Spring Boot application designed to manage software
 
 ---
 
+## Swagger URL
+http://localhost:8080/swagger-ui/index.html#/
+
 ## 🧱 Key Components
 
 ### 1. Entity Layer
