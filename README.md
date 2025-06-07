@@ -14,7 +14,8 @@ The **Project Tracker** is a Spring Boot application designed to manage software
 ---
 
 ## Swagger URL
-http://localhost:8080/swagger-ui/index.html#/
+run docker-compose up --build
+vist: http://localhost:8080/swagger-ui/index.html#/
 
 ## 🧱 Key Components
 
@@ -129,6 +130,300 @@ Uses **Jakarta Bean Validation** (`jakarta.validation.constraints`) on entity fi
     ```
 
 ---
+
+## 📘API - Test Documentation
+
+This document outlines test scenarios, endpoints, parameters, and expected behaviors for the following controllers:
+
+- [`ProjectController`](#projectcontroller)
+- [`DeveloperController`](#developercontroller)
+- [`TaskController`](#taskcontroller)
+- [`AuditLogController`](#auditlogcontroller)
+
+---
+
+### 🧱 ProjectController
+
+**Base URL:** `/api/projects`
+
+#### ✅ 1. Create Project
+
+- **POST** `/api/projects`
+- **Request Body:** `ProjectRequestDTO`
+- **Response:** `201 Created` with `ProjectResponseDTO`
+
+**Test Cases:**
+
+| Test Case                        | Expected Behavior                                |
+|----------------------------------|--------------------------------------------------|
+| Valid project creation           | Returns 201 and the created project              |
+| Invalid input (missing name)     | Returns 400 with validation error                |
+
+---
+
+#### ✅ 2. Update Project
+
+- **PUT** `/api/projects/{id}`
+- **Request Body:** `ProjectRequestDTO`
+- **Response:** `200 OK` with updated `ProjectResponseDTO`
+
+**Test Cases:**
+
+| Test Case                        | Expected Behavior                                 |
+|----------------------------------|---------------------------------------------------|
+| Update existing project          | Returns 200 with updated fields                   |
+| Update non-existent project      | Returns 404                                       |
+| Invalid input                    | Returns 400 with validation errors                |
+
+---
+
+#### ✅ 3. Delete Project
+
+- **DELETE** `/api/projects/{id}`
+- **Response:** `204 No Content`
+
+**Test Cases:**
+
+| Test Case                        | Expected Behavior     |
+|----------------------------------|------------------------|
+| Delete existing project          | Returns 204            |
+| Delete non-existent project      | Returns 404            |
+
+---
+
+#### ✅ 4. Get Project By ID
+
+- **GET** `/api/projects/{id}`
+- **Response:** `200 OK` with `ProjectResponseDTO`
+
+**Test Cases:**
+
+| Test Case                        | Expected Behavior     |
+|----------------------------------|------------------------|
+| Valid ID                         | Returns project info   |
+| Invalid ID                       | Returns 404            |
+
+---
+
+#### ✅ 5. Get All Projects (Paged)
+
+- **GET** `/api/projects`
+- **Response:** `200 OK` with `Page<ProjectResponseDTO>`
+
+**Test Cases:**
+
+| Test Case                     | Expected Behavior              |
+|-------------------------------|--------------------------------|
+| No filters                    | Returns paginated list         |
+| Page/size/sort specified      | Returns correct page/order     |
+
+---
+
+### 🧑‍💻 DeveloperController
+
+**Base URL:** `/api/developers`
+
+#### ✅ 1. Create Developer
+
+- **POST** `/api/developers`
+- **Request Body:** `DeveloperRequestDTO`
+- **Response:** `201 Created` with `DeveloperResponseDTO`
+
+**Test Cases:**
+
+| Test Case                        | Expected Behavior                     |
+|----------------------------------|----------------------------------------|
+| Valid developer creation         | Returns 201 with created developer     |
+| Invalid input                    | Returns 400 with validation error      |
+
+---
+
+#### ✅ 2. Update Developer
+
+- **PUT** `/api/developers/{id}`
+- **Response:** `200 OK` with `DeveloperResponseDTO`
+
+**Test Cases:**
+
+| Test Case                        | Expected Behavior                     |
+|----------------------------------|----------------------------------------|
+| Valid update                     | Returns 200 with updated data          |
+| Invalid ID                       | Returns 404                            |
+| Invalid input                    | Returns 400                            |
+
+---
+
+#### ✅ 3. Delete Developer
+
+- **DELETE** `/api/developers/{id}`
+- **Response:** `204 No Content`
+
+**Test Cases:**
+
+| Test Case                        | Expected Behavior     |
+|----------------------------------|------------------------|
+| Valid ID                         | Returns 204            |
+| Non-existent ID                  | Returns 404            |
+
+---
+
+#### ✅ 4. Get Developer By ID
+
+- **GET** `/api/developers/{id}`
+- **Response:** `200 OK` with `DeveloperResponseDTO`
+
+**Test Cases:**
+
+| Test Case                        | Expected Behavior     |
+|----------------------------------|------------------------|
+| Valid ID                         | Returns developer      |
+| Invalid ID                       | Returns 404            |
+
+---
+
+#### ✅ 5. Get All Developers (Paged)
+
+- **GET** `/api/developers`
+- **Response:** `200 OK` with `Page<DeveloperResponseDTO>`
+
+**Test Cases:**
+
+| Test Case                  | Expected Behavior               |
+|----------------------------|---------------------------------|
+| Default pagination         | Returns first page              |
+| With size/page params      | Returns paginated content       |
+
+---
+
+#### ✅ TaskController
+
+**Base URL:** `/api/tasks`
+
+#### ✅ 1. Create Task
+
+- **POST** `/api/tasks`
+- **Request Body:** `TaskRequestDTO`
+- **Response:** `201 Created` with `TaskResponseDTO`
+
+**Test Cases:**
+
+| Test Case                    | Expected Behavior                          |
+|------------------------------|---------------------------------------------|
+| Valid task creation          | Returns 201 and created task               |
+| Missing project/developer ID | Returns 400 with validation error          |
+
+---
+
+#### ✅ 2. Update Task
+
+- **PUT** `/api/tasks/{id}`
+- **Request Body:** `TaskRequestDTO`
+- **Response:** `200 OK` with updated `TaskResponseDTO`
+
+**Test Cases:**
+
+| Test Case                   | Expected Behavior                           |
+|-----------------------------|---------------------------------------------|
+| Valid task update           | Returns 200 with updated task               |
+| Non-existent task ID        | Returns 404                                 |
+| Invalid input               | Returns 400                                 |
+
+---
+
+#### ✅ 3. Delete Task
+
+- **DELETE** `/api/tasks/{id}`
+- **Response:** `204 No Content`
+
+**Test Cases:**
+
+| Test Case                   | Expected Behavior      |
+|-----------------------------|------------------------|
+| Valid ID                    | Task is deleted        |
+| Invalid ID                  | Returns 404            |
+
+---
+
+#### ✅ 4. Get Task By ID
+
+- **GET** `/api/tasks/{id}`
+- **Response:** `200 OK` with `TaskResponseDTO`
+
+**Test Cases:**
+
+| Test Case                   | Expected Behavior        |
+|-----------------------------|--------------------------|
+| Valid ID                    | Returns task details     |
+| Invalid ID                  | Returns 404              |
+
+---
+
+#### ✅ 5. Get All Tasks (Paged)
+
+- **GET** `/api/tasks`
+- **Response:** `200 OK` with `Page<TaskResponseDTO>`
+
+**Test Cases:**
+
+| Test Case                | Expected Behavior                    |
+|--------------------------|--------------------------------------|
+| Default request          | Returns all tasks in pages          |
+| Pagination/sorting       | Returns correct page/sorted results |
+
+---
+
+### 🧾 AuditLogController
+
+**Base URL:** `/api/logs`
+
+#### ✅ 1. Get Audit Logs (Unpaged)
+
+- **GET** `/api/logs`
+- **Query Parameters:** `entityType`, `actorName`
+- **Response:** `200 OK` with `List<AuditLogDTO>`
+
+**Test Cases:**
+
+| Test Case                                      | Expected Result                    |
+|------------------------------------------------|------------------------------------|
+| No filters                                     | Returns all logs                   |
+| `entityType=Project`                           | Returns only project-related logs  |
+| `actorName=John`                               | Returns logs by actor `John`       |
+| Both filters combined                          | Filtered list of logs              |
+| Non-matching filters                           | Returns empty list                 |
+
+---
+
+#### ✅ 2. Get Audit Logs (Paged)
+
+- **GET** `/api/logs/paged`
+- **Query Parameters:** `entityType`, `actorName`, `page`, `size`, `sort`
+- **Response:** `200 OK` with `Page<AuditLogDTO>`
+
+**Test Cases:**
+
+| Test Case                                      | Expected Result                    |
+|------------------------------------------------|------------------------------------|
+| No filters                                     | Returns paged logs                 |
+| Pagination (`page=1&size=5`)                   | Returns correct slice              |
+| Sorted by timestamp                            | Returns logs sorted                |
+| Combined filters and pagination                | Returns filtered + paged logs      |
+| Invalid page number                            | Returns empty content              |
+
+---
+
+### 🛠 Testing Recommendations
+
+- Use `@WebMvcTest` + `MockMvc` for controller unit testing
+- Use `PageImpl` for mocking paginated results
+- Mock dependencies with `@MockBean`
+- Validate Swagger docs with Swagger UI
+- Always test both valid and invalid input scenarios
+
+---
+
+
+
 
 ## 🔮 Future Enhancements
 
