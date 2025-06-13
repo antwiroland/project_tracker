@@ -30,6 +30,32 @@ Defines the domain models:
 
 ---
 
+## Database Schema
+`CREATE TABLE users (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    role VARCHAR(20) NOT NULL
+);`
+
+`CREATE TABLE projects (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    status VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);`
+
+`CREATE TABLE tasks (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
+    status VARCHAR(20) NOT NULL,
+    project_id BIGINT REFERENCES projects(id),
+    developer_id BIGINT REFERENCES users(id)
+);`
+
 ### 2. DTOs (Data Transfer Objects)
 
 Used to transfer data between different application layers:
