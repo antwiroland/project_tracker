@@ -157,4 +157,12 @@ public class TaskController {
 
         return ResponseEntity.ok(response);
     }
+
+    public ResponseEntity<ApiResponseDTO<TaskResponseDTO>> updateTask(@PathVariable long id, TaskRequestDTO taskRequestDTO) {
+        TaskResponseDTO taskResponseDTO = taskService.updateTask(id,taskRequestDTO);
+
+        ApiResponseDTO<TaskResponseDTO> response = ApiResponseDTO.<TaskResponseDTO>builder().status(201).message("Task successfully updated").data(taskResponseDTO).build();
+
+        return ResponseEntity.ok(response);
+    }
 }

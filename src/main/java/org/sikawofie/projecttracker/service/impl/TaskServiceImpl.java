@@ -15,6 +15,7 @@ import org.sikawofie.projecttracker.service.TaskService;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -117,6 +118,24 @@ public class TaskServiceImpl implements TaskService {
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public TaskResponseDTO updateTask(long id, TaskRequestDTO taskRequestDTO) {
+        Task task =  taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task with " + id + " not found" )
+        );
+        if(taskRequestDTO.getTitle() != null) {
+           task.setTitle(taskRequestDTO.getTitle());
+        }
+
+        if(taskRequestDTO.getDescription() != null) {
+            task.setDescription(taskRequestDTO.getDescription());
+        }
+
+        if(taskRequestDTO.getStatus() != null) {
+            task.setStatus(taskRequestDTO.getStatus());
+        }
+        return mapToDTO(taskRepository.save(task));
     }
 
     // Mapping methods
