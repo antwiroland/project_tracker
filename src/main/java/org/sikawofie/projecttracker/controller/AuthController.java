@@ -52,14 +52,4 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/oauth2/success")
-    @Operation(summary = "Handle OAuth2 login success", description = "Triggered after successful OAuth2 login; returns user info or redirects")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OAuth2 login successful"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized access")
-    })
-
-    public String handleSuccess(Principal principal) {
-        return principal.getName();
-    }
 }
