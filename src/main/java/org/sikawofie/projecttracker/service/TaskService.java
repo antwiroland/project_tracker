@@ -13,4 +13,6 @@ public interface TaskService {
     List<TaskResponseDTO> getTasksByDeveloperId(Long developerId);
     List<TaskResponseDTO> getOverdueTasks();
     List<TaskResponseDTO> getTasksSorted(String sortBy);
+
+    TaskResponseDTO updateTask(long id, TaskRequestDTO taskRequestDTO);
 }
