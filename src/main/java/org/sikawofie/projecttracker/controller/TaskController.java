@@ -32,6 +32,19 @@ public class TaskController {
 
     private final TaskService taskService;
 
+
+    @GetMapping
+    @PreAuthorize("hasRole('MANAGER') or hasRole('ADMIN')")
+    @Operation(summary = "Get all task", description = "Returns a list of tasks")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of tasks"),
+            @ApiResponse(responseCode = "200", description = "[]")
+    })
+    public ResponseEntity<List<TaskResponseDTO>> getAllTasks() {
+        List<TaskResponseDTO> allTasks = taskService.getAllTasks();
+        return ResponseEntity.ok(allTasks);
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('MANAGER') or hasRole('ADMIN')")
     @Operation(summary = "Create a new task", description = "Creates a new task using the provided TaskDTO")

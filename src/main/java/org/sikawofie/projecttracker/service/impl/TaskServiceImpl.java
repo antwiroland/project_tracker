@@ -30,6 +30,12 @@ public class TaskServiceImpl implements TaskService {
     private final ProjectRepository projectRepository;
     private final AuditLogService auditLogService;
 
+    public List<TaskResponseDTO> getAllTasks() {
+        return taskRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
+
     @Override
     public TaskResponseDTO createTask(TaskRequestDTO dto) {
         Task task = mapToEntity(dto);

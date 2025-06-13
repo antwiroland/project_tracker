@@ -6,6 +6,7 @@ import org.sikawofie.projecttracker.dto.TaskResponseDTO;
 import java.util.List;
 
 public interface TaskService {
+    List<TaskResponseDTO> getAllTasks();
     TaskResponseDTO createTask(TaskRequestDTO taskDTO);
     TaskResponseDTO assignTask(Long taskId, Long developerId);
     void deleteTask(Long taskId);
