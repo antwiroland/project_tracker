@@ -92,7 +92,7 @@ public class DeveloperServiceImpl implements DeveloperService {
     }
 
     // Helper methods
-    private DeveloperResponseDTO mapToDTO(Developer developer) {
+    public DeveloperResponseDTO mapToDTO(Developer developer) {
         DeveloperResponseDTO dto = new DeveloperResponseDTO();
         dto.setId(developer.getId());
         dto.setName(developer.getName());
@@ -101,7 +101,7 @@ public class DeveloperServiceImpl implements DeveloperService {
         return dto;
     }
 
-    private Developer mapToEntity(DeveloperRequestDTO dto) {
+    public Developer mapToEntity(DeveloperRequestDTO dto) {
         Developer developer = new Developer();
         developer.setName(dto.getName());
         developer.setEmail(dto.getEmail());
