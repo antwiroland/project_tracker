@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class AuthResponseDTO {
     private int status;
     private String message;
+    private String email;
     private String token;
 }

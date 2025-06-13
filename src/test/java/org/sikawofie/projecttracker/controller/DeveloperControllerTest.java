@@ -1,158 +1,202 @@
 package org.sikawofie.projecttracker.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.sikawofie.projecttracker.dto.DeveloperRequestDTO;
 import org.sikawofie.projecttracker.dto.DeveloperResponseDTO;
-import org.sikawofie.projecttracker.service.DeveloperService;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
+import org.sikawofie.projecttracker.entity.Developer;
+import org.sikawofie.projecttracker.exception.ResourceNotFoundException;
+import org.sikawofie.projecttracker.repository.DeveloperRepository;
+import org.sikawofie.projecttracker.service.impl.AuditLogService;
+import org.sikawofie.projecttracker.service.impl.DeveloperServiceImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.*;
 
-@WebMvcTest(DeveloperController.class)
-@Import(DeveloperControllerTest.MockConfig.class)
-class DeveloperControllerTest {
+@ExtendWith(MockitoExtension.class)
+class DeveloperServiceImplTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Mock
+    private DeveloperRepository developerRepository;
 
-    @Autowired
-    private DeveloperService developerService;
+    @Mock
+    private AuditLogService auditLogService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @InjectMocks
+    private DeveloperServiceImpl developerService;
 
-    @TestConfiguration
-    static class MockConfig {
-        @Bean
-        public DeveloperService developerService() {
-            return Mockito.mock(DeveloperService.class);
-        }
+    private Developer developer;
+    private DeveloperRequestDTO requestDTO;
+    private DeveloperResponseDTO responseDTO;
+
+    @BeforeEach
+    void setUp() {
+        developer = new Developer();
+        developer.setId(1L);
+        developer.setName("John Doe");
+        developer.setEmail("john@example.com");
+        developer.setSkills(List.of("Java", "Spring"));
+
+        requestDTO = new DeveloperRequestDTO();
+        requestDTO.setName("John Doe");
+        requestDTO.setEmail("john@example.com");
+        requestDTO.setSkills(List.of("Java", "Spring"));
+
+        responseDTO = new DeveloperResponseDTO();
+        responseDTO.setId(1L);
+        responseDTO.setName("John Doe");
+        responseDTO.setEmail("john@example.com");
+        responseDTO.setSkills(List.of("Java", "Spring"));
     }
 
     @Test
-    void createDeveloper_ShouldReturnCreatedDeveloper() throws Exception {
-        DeveloperRequestDTO request = new DeveloperRequestDTO(
-                "Alice",
-                "alice@example.com",
-                List.of("Java", "Spring")
-        );
+    void createDeveloper_Success() {
+        when(developerRepository.save(any(Developer.class))).thenReturn(developer);
 
-        DeveloperResponseDTO response = new DeveloperResponseDTO();
-        response.setId(1L);
-        response.setName("Alice");
-        response.setEmail("alice@example.com");
-        response.setSkills(List.of("Java", "Spring"));
+        DeveloperResponseDTO result = developerService.createDeveloper(requestDTO);
 
-        Mockito.when(developerService.createDeveloper(any())).thenReturn(response);
-
-        mockMvc.perform(post("/api/developers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.id").value(1L))
-                .andExpect(jsonPath("$.data.name").value("Alice"))
-                .andExpect(jsonPath("$.data.email").value("alice@example.com"))
-                .andExpect(jsonPath("$.data.skills[0]").value("Java"))
-                .andExpect(jsonPath("$.data.skills[1]").value("Spring"));
+        assertNotNull(result);
+        assertEquals(developer.getId(), result.getId());
+        verify(developerRepository, times(1)).save(any(Developer.class));
+        verify(auditLogService, times(1)).logAction(
+                eq("CREATE"),
+                eq("Developer"),
+                anyString(),
+                any(Developer.class),
+                eq("SYSTEM"));
     }
 
     @Test
-    void updateDeveloper_ShouldReturnUpdatedDeveloper() throws Exception {
-        DeveloperRequestDTO request = new DeveloperRequestDTO(
-                "Bob",
-                "bob@example.com",
-                List.of("Python", "Django")
-        );
+    void updateDeveloper_Success() {
+        when(developerRepository.findById(1L)).thenReturn(Optional.of(developer));
+        when(developerRepository.save(any(Developer.class))).thenReturn(developer);
 
-        DeveloperResponseDTO response = new DeveloperResponseDTO();
-        response.setId(2L);
-        response.setName("Bob");
-        response.setEmail("bob@example.com");
-        response.setSkills(List.of("Python", "Django"));
+        DeveloperResponseDTO result = developerService.updateDeveloper(1L, requestDTO);
 
-        Mockito.when(developerService.updateDeveloper(eq(2L), any())).thenReturn(response);
-
-        mockMvc.perform(put("/api/developers/2")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id").value(2L))
-                .andExpect(jsonPath("$.data.name").value("Bob"))
-                .andExpect(jsonPath("$.data.email").value("bob@example.com"))
-                .andExpect(jsonPath("$.data.skills[0]").value("Python"))
-                .andExpect(jsonPath("$.data.skills[1]").value("Django"));
+        assertNotNull(result);
+        assertEquals(developer.getId(), result.getId());
+        verify(developerRepository, times(1)).save(developer);
+        verify(auditLogService, times(1)).logAction(
+                eq("UPDATE"),
+                eq("Developer"),
+                anyString(),
+                any(Developer.class),
+                eq("SYSTEM"));
     }
 
     @Test
-    void deleteDeveloper_ShouldReturnNoContent() throws Exception {
-        mockMvc.perform(delete("/api/developers/3"))
-                .andExpect(status().isNoContent());
+    void updateDeveloper_NotFound() {
+        when(developerRepository.findById(1L)).thenReturn(Optional.empty());
 
-        Mockito.verify(developerService).deleteDeveloper(3L);
+        assertThrows(ResourceNotFoundException.class, () -> {
+            developerService.updateDeveloper(1L, requestDTO);
+        });
+
+        verify(developerRepository, never()).save(any(Developer.class));
     }
 
     @Test
-    void getDeveloperById_ShouldReturnDeveloper() throws Exception {
-        DeveloperResponseDTO response = new DeveloperResponseDTO();
-        response.setId(4L);
-        response.setName("Charlie");
-        response.setEmail("charlie@example.com");
-        response.setSkills(List.of("JavaScript", "React"));
+    void deleteDeveloper_Success() {
+        when(developerRepository.findById(1L)).thenReturn(Optional.of(developer));
+        doNothing().when(developerRepository).delete(developer);
 
-        Mockito.when(developerService.getDeveloperById(4L)).thenReturn(response);
+        developerService.deleteDeveloper(1L);
 
-        mockMvc.perform(get("/api/developers/4"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id").value(4L))
-                .andExpect(jsonPath("$.data.name").value("Charlie"))
-                .andExpect(jsonPath("$.data.email").value("charlie@example.com"))
-                .andExpect(jsonPath("$.data.skills[0]").value("JavaScript"))
-                .andExpect(jsonPath("$.data.skills[1]").value("React"));
+        verify(developerRepository, times(1)).delete(developer);
+        verify(auditLogService, times(1)).logAction(
+                eq("DELETE"),
+                eq("Developer"),
+                anyString(),
+                any(Developer.class),
+                eq("SYSTEM"));
     }
 
     @Test
-    void getAllDevelopers_ShouldReturnPaginatedList() throws Exception {
-        DeveloperResponseDTO dev1 = new DeveloperResponseDTO();
-        dev1.setId(1L);
-        dev1.setName("Alice");
-        dev1.setEmail("alice@example.com");
-        dev1.setSkills(List.of("Java", "Spring"));
+    void deleteDeveloper_NotFound() {
+        when(developerRepository.findById(1L)).thenReturn(Optional.empty());
 
-        DeveloperResponseDTO dev2 = new DeveloperResponseDTO();
-        dev2.setId(2L);
-        dev2.setName("Bob");
-        dev2.setEmail("bob@example.com");
-        dev2.setSkills(List.of("Python", "Django"));
+        assertThrows(ResourceNotFoundException.class, () -> {
+            developerService.deleteDeveloper(1L);
+        });
 
-        Page<DeveloperResponseDTO> page = new PageImpl<>(List.of(dev1, dev2));
+        verify(developerRepository, never()).delete(any(Developer.class));
+    }
 
-        Mockito.when(developerService.getAllDevelopers(any())).thenReturn(page);
+    @Test
+    void getAllDevelopers_Success() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(developerRepository.findAll(pageable))
+                .thenReturn(new PageImpl<>(Collections.singletonList(developer)));
 
-        mockMvc.perform(get("/api/developers?page=0&size=2"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content.length()").value(2))
-                .andExpect(jsonPath("$.data.content[0].name").value("Alice"))
-                .andExpect(jsonPath("$.data.content[0].email").value("alice@example.com"))
-                .andExpect(jsonPath("$.data.content[0].skills[0]").value("Java"))
-                .andExpect(jsonPath("$.data.content[0].skills[1]").value("Spring"))
-                .andExpect(jsonPath("$.data.content[1].name").value("Bob"))
-                .andExpect(jsonPath("$.data.content[1].email").value("bob@example.com"))
-                .andExpect(jsonPath("$.data.content[1].skills[0]").value("Python"))
-                .andExpect(jsonPath("$.data.content[1].skills[1]").value("Django"));
+        Page<DeveloperResponseDTO> result = developerService.getAllDevelopers(pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(developer.getId(), result.getContent().get(0).getId());
+    }
+
+    @Test
+    void getAllDevelopers_Empty() {
+        Pageable pageable = PageRequest.of(0, 10);
+        when(developerRepository.findAll(pageable)).thenReturn(Page.empty());
+
+        Page<DeveloperResponseDTO> result = developerService.getAllDevelopers(pageable);
+
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+    }
+
+    @Test
+    void getDeveloperById_Success() {
+        when(developerRepository.findById(1L)).thenReturn(Optional.of(developer));
+
+        DeveloperResponseDTO result = developerService.getDeveloperById(1L);
+
+        assertNotNull(result);
+        assertEquals(developer.getId(), result.getId());
+        assertEquals(developer.getName(), result.getName());
+    }
+
+    @Test
+    void getDeveloperById_NotFound() {
+        when(developerRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> {
+            developerService.getDeveloperById(1L);
+        });
+    }
+
+    @Test
+    void mapToDTO_Success() {
+        DeveloperResponseDTO dto = developerService.mapToDTO(developer);
+
+        assertNotNull(dto);
+        assertEquals(developer.getId(), dto.getId());
+        assertEquals(developer.getName(), dto.getName());
+        assertEquals(developer.getEmail(), dto.getEmail());
+        assertEquals(developer.getSkills(), dto.getSkills());
+    }
+
+    @Test
+    void mapToEntity_Success() {
+        Developer entity = developerService.mapToEntity(requestDTO);
+
+        assertNotNull(entity);
+        assertEquals(requestDTO.getName(), entity.getName());
+        assertEquals(requestDTO.getEmail(), entity.getEmail());
+        assertEquals(requestDTO.getSkills(), entity.getSkills());
     }
 }

@@ -58,6 +58,7 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "OAuth2 login successful"),
             @ApiResponse(responseCode = "401", description = "Unauthorized access")
     })
+
     public String handleSuccess(Principal principal) {
         return principal.getName();
     }

@@ -80,14 +80,28 @@
             </exclusions>
         </dependency>
 
-        <!-- Mockito (latest) -->
+        <!-- Testing -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Mockito JUnit Jupiter integration -->
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
+            <artifactId>mockito-junit-jupiter</artifactId>
             <version>5.11.0</version>
             <scope>test</scope>
         </dependency>
 
+        <!-- Spring Security Test -->
         <!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-core -->
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -128,6 +142,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
         </dependency>
 
 

@@ -100,7 +100,7 @@ public class ProjectServiceImpl implements ProjectService {
         return projectRepository.findAll(pageable).map(this::mapToDTO);
     }
 
-    private ProjectResponseDTO mapToDTO(Project project) {
+    public ProjectResponseDTO mapToDTO(Project project) {
         return ProjectResponseDTO.builder()
                 .id(project.getId())
                 .name(project.getName())
@@ -110,7 +110,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .build();
     }
 
-    private Project mapToEntity(ProjectRequestDTO dto) {
+    public Project mapToEntity(ProjectRequestDTO dto) {
         Project project = new Project();
         project.setName(dto.getName());
         project.setDescription(dto.getDescription());

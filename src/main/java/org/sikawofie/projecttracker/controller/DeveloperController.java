@@ -15,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 @RestController
 @RequestMapping("/api/developers")
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ public class DeveloperController {
 
     private final DeveloperService developerService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "Create a developer", description = "Create a new developer using the provided DeveloperDTO")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Developer created successfully"),
@@ -41,6 +44,7 @@ public class DeveloperController {
         return ResponseEntity.status(201).body(response);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "Update a developer", description = "Update an existing developer identified by ID using the provided DeveloperDTO")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Developer updated successfully"),
@@ -62,6 +66,7 @@ public class DeveloperController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete a developer", description = "Delete the developer with the specified ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Developer deleted successfully"),
@@ -79,6 +84,7 @@ public class DeveloperController {
         return ResponseEntity.status(204).body(response);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'DEVELOPER', 'CONTRACTOR')")
     @Operation(summary = "Get all developers", description = "Retrieve a paginated list of all developers")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of developers retrieved successfully")
@@ -96,6 +102,7 @@ public class DeveloperController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'DEVELOPER', 'CONTRACTOR')")
     @Operation(summary = "Get developer by ID", description = "Retrieve a developer using the provided ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Developer retrieved successfully"),
