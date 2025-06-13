@@ -6,9 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.sikawofie.projecttracker.dto.ApiResponseDTO;
 import org.sikawofie.projecttracker.dto.TaskRequestDTO;
 import org.sikawofie.projecttracker.dto.TaskResponseDTO;
+import org.sikawofie.projecttracker.entity.User;
 import org.sikawofie.projecttracker.service.TaskService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -53,6 +55,27 @@ public class TaskController {
 
         return ResponseEntity.created(location).body(response);
     }
+
+
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('DEVELOPER')")
+    @Operation(summary = "Get current developer's tasks", description = "Retrieves all tasks assigned to the currently logged-in developer")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Tasks fetched successfully")
+    })
+    public ResponseEntity<ApiResponseDTO<List<TaskResponseDTO>>> getMyTasks(Authentication authentication) {
+        Long developerId = ((User) authentication.getPrincipal()).getId();
+        List<TaskResponseDTO> tasks = taskService.getTasksByDeveloperId(developerId);
+
+        ApiResponseDTO<List<TaskResponseDTO>> response = ApiResponseDTO.<List<TaskResponseDTO>>builder()
+                .status(200)
+                .message("Tasks fetched successfully")
+                .data(tasks)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
 
     @PostMapping("/{taskId}/assign/{developerId}")
     @PreAuthorize("hasRole('MANAGER') or hasRole('ADMIN')")
