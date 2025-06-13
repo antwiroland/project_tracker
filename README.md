@@ -6,7 +6,7 @@ The **Project Tracker** is a Spring Boot application designed to manage software
 
 ## 🧩 Component Diagram
 
-![Component Diagram](docs/Component-Diagram.svg)
+![Component Diagram]()
 
 
 * The architecture consists of layered components: Entity, DTO, Repository, Service, Controller, and external MongoDB for auditing.*
