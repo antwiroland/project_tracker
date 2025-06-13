@@ -7,6 +7,7 @@ import org.sikawofie.projecttracker.dto.UserResponseDTO;
 import org.sikawofie.projecttracker.entity.User;
 import org.sikawofie.projecttracker.repository.UserRepo;
 import org.sikawofie.projecttracker.security.JwtService;
+import org.sikawofie.projecttracker.service.ProjectService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserServiceImpl implements ProjectService.UserService {
 
     private final UserRepo userRepo;
     private final AuthenticationManager authenticationManager;
