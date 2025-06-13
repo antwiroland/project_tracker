@@ -15,23 +15,18 @@ import java.util.*;
 @AllArgsConstructor
 @Builder
 public class Developer {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Developer name is required")
     private String name;
 
-    @Email(message = "Must be a valid email")
-    @Column(unique = true)
     private String email;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "developer_skills", joinColumns = @JoinColumn(name = "developer_id"))
     @Column(name = "skill")
     private List<String> skills = new ArrayList<>();
-
 
     @OneToMany(mappedBy = "developer", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Task> tasks = new HashSet<>();

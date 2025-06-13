@@ -14,7 +14,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class Task {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,5 +33,4 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "developer_id")
     private Developer developer;
-
 }

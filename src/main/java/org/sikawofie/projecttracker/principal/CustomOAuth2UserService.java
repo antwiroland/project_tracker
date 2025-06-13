@@ -1,7 +1,6 @@
 package org.sikawofie.projecttracker.principal;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.sikawofie.projecttracker.entity.Role;
 import org.sikawofie.projecttracker.entity.User;
 import org.sikawofie.projecttracker.repository.RoleRepo;
@@ -19,12 +18,11 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-@NoArgsConstructor
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-    private UserRepo userRepository;
-    private RoleRepo roleRepository;
+    private final UserRepo userRepository;
+    private final RoleRepo roleRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -38,6 +36,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Optional<User> existingUserOpt = userRepository.findByEmail(email);
         if (existingUserOpt.isEmpty()) {
             User newUser = new User();
+            newUser.setUsername(email);
             newUser.setEmail(email);
             newUser.setOauthUser(true);
             newUser.setPassword("oauth-user");

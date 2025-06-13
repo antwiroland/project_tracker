@@ -18,17 +18,13 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Project {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Project name must not be null")
-    @Size(min = 2, max = 100, message = "Project name must be between 2 and 100 characters")
     private String name;
 
     private String description;
-
     private LocalDate deadline;
 
     @Enumerated(EnumType.STRING)
@@ -37,5 +33,4 @@ public class Project {
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Task> tasks = new ArrayList<>();
-
 }

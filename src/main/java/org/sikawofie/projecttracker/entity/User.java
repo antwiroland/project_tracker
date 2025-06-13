@@ -21,7 +21,6 @@ public class User {
     private String password;
     boolean oauthUser;
 
-
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
 }
