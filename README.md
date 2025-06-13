@@ -168,6 +168,28 @@ This document outlines test scenarios, endpoints, parameters, and expected behav
 
 ---
 
+---
+## Authentication Endpoints
+
+#### ✅ 1. Create User
+- **POST** `/api/auth/register`
+- **Request Body:** `AuthResponseDTO`
+- **Response:** `201 Created` with `AuthRequestDTO`
+
+#### ✅ 1. Login User
+- **POST** `/api/auth/login`
+- **Request Body:** `AuthResponseDTO`
+- **Response:** `201 login successfull` with `AuthRequestDTO
+
+  #### ✅ 1. GET Initiate OAuth2 flow
+- **GET** `/api/auth/authorization/{provider}`
+- **Request Body:** `AuthResponseDTO`
+- **Response:** `201 login successfull` with `AuthRequestDTO
+
+  #### Authentication flow
+  ![Authentication - flow](docs/auth.svg)
+  ![Authentication - flow](docs/auth-1.svg)
+
 ### 🧱 ProjectController
 
 **Base URL:** `/api/projects`
