@@ -8,6 +8,7 @@ import org.sikawofie.projecttracker.dto.TaskRequestDTO;
 import org.sikawofie.projecttracker.dto.TaskResponseDTO;
 import org.sikawofie.projecttracker.service.TaskService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -30,6 +31,7 @@ public class TaskController {
     private final TaskService taskService;
 
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER') or hasRole('ADMIN')")
     @Operation(summary = "Create a new task", description = "Creates a new task using the provided TaskDTO")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Task created successfully"),
@@ -52,7 +54,8 @@ public class TaskController {
         return ResponseEntity.created(location).body(response);
     }
 
-    @PostMapping("/{taskId}/assign/{developerId}") // changed from PUT to POST to match your test endpoint
+    @PostMapping("/{taskId}/assign/{developerId}")
+    @PreAuthorize("hasRole('MANAGER') or hasRole('ADMIN')")
     @Operation(summary = "Assign a task to a developer", description = "Assigns the task with the given ID to the developer with the given ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Task assigned successfully"),
@@ -72,7 +75,30 @@ public class TaskController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('DEVELOPER') and @securityUtil.isTaskOwner(authentication.name, #id))")
+    @Operation(summary = "Update a task", description = "Only task owner or admin can update a task")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Task successfully updated"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - not task owner or not authorized"),
+            @ApiResponse(responseCode = "404", description = "Task not found")
+    })
+    public ResponseEntity<ApiResponseDTO<TaskResponseDTO>> updateTask(
+            @PathVariable long id,
+            @Valid @RequestBody TaskRequestDTO taskRequestDTO) {
+        TaskResponseDTO taskResponseDTO = taskService.updateTask(id, taskRequestDTO);
+
+        ApiResponseDTO<TaskResponseDTO> response = ApiResponseDTO.<TaskResponseDTO>builder()
+                .status(200)
+                .message("Task successfully updated")
+                .data(taskResponseDTO)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete a task", description = "Deletes the task with the specified ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Task deleted successfully"),
@@ -80,11 +106,11 @@ public class TaskController {
     })
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
         taskService.deleteTask(id);
-        // Return 204 No Content with no body (matches your test expectations)
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/project/{projectId}")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get tasks by project ID", description = "Retrieves all tasks associated with the specified project ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tasks fetched successfully"),
@@ -95,7 +121,7 @@ public class TaskController {
 
         ApiResponseDTO<List<TaskResponseDTO>> response = ApiResponseDTO.<List<TaskResponseDTO>>builder()
                 .status(200)
-                .message("Tasks fetched successfully") // matches test message
+                .message("Tasks fetched successfully")
                 .data(tasks)
                 .build();
 
@@ -103,6 +129,7 @@ public class TaskController {
     }
 
     @GetMapping("/developer/{developerId}")
+    @PreAuthorize("hasRole('DEVELOPER') or hasRole('ADMIN')")
     @Operation(summary = "Get tasks by developer ID", description = "Retrieves all tasks assigned to the specified developer")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tasks fetched successfully"),
@@ -113,7 +140,7 @@ public class TaskController {
 
         ApiResponseDTO<List<TaskResponseDTO>> response = ApiResponseDTO.<List<TaskResponseDTO>>builder()
                 .status(200)
-                .message("Tasks fetched successfully") // matches test message
+                .message("Tasks fetched successfully")
                 .data(tasks)
                 .build();
 
@@ -121,6 +148,7 @@ public class TaskController {
     }
 
     @GetMapping("/overdue")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get overdue tasks", description = "Retrieves all tasks that are overdue and not completed")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Overdue tasks fetched")
@@ -130,14 +158,15 @@ public class TaskController {
 
         ApiResponseDTO<List<TaskResponseDTO>> response = ApiResponseDTO.<List<TaskResponseDTO>>builder()
                 .status(200)
-                .message("Overdue tasks fetched") // matches test message
+                .message("Overdue tasks fetched")
                 .data(overdueTasks)
                 .build();
 
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/sorted")  // changed from /sort to /sorted to match your test
+    @GetMapping("/sorted")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get tasks sorted by field", description = "Retrieves all tasks sorted by the specified field")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tasks fetched sorted by field"),
@@ -151,17 +180,9 @@ public class TaskController {
 
         ApiResponseDTO<List<TaskResponseDTO>> response = ApiResponseDTO.<List<TaskResponseDTO>>builder()
                 .status(200)
-                .message("Tasks fetched sorted by " + sortBy) // matches test message exactly
+                .message("Tasks fetched sorted by " + sortBy)
                 .data(sortedTasks)
                 .build();
-
-        return ResponseEntity.ok(response);
-    }
-
-    public ResponseEntity<ApiResponseDTO<TaskResponseDTO>> updateTask(@PathVariable long id, TaskRequestDTO taskRequestDTO) {
-        TaskResponseDTO taskResponseDTO = taskService.updateTask(id,taskRequestDTO);
-
-        ApiResponseDTO<TaskResponseDTO> response = ApiResponseDTO.<TaskResponseDTO>builder().status(201).message("Task successfully updated").data(taskResponseDTO).build();
 
         return ResponseEntity.ok(response);
     }
