@@ -6,18 +6,17 @@ import org.sikawofie.projecttracker.dto.ApiResponseDTO;
 import org.sikawofie.projecttracker.dto.AuthResponseDTO;
 import org.sikawofie.projecttracker.dto.UserRequestDTO;
 import org.sikawofie.projecttracker.dto.UserResponseDTO;
-import org.sikawofie.projecttracker.service.impl.UserServiceImpl;
+import org.sikawofie.projecttracker.service.impl.AuthServiceImpl;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
-public class UserController {
-    private final UserServiceImpl userService;
+public class AuthController {
+    private final AuthServiceImpl userService;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponseDTO<UserResponseDTO>> createUser(@Valid @RequestBody UserRequestDTO userRequestDTO) {
@@ -30,5 +29,10 @@ public class UserController {
     public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody UserRequestDTO userRequestDTO) {
         AuthResponseDTO response = userService.verify(userRequestDTO);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/oauth2/success")
+    public String handleSuccess(Principal principal) {
+        return principal.getName();
     }
 }
