@@ -11,6 +11,7 @@ import org.sikawofie.projecttracker.service.TaskService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -32,7 +33,6 @@ public class TaskController {
 
     private final TaskService taskService;
 
-
     @GetMapping
     @PreAuthorize("hasRole('MANAGER') or hasRole('ADMIN')")
     @Operation(summary = "Get all task", description = "Returns a list of tasks")
@@ -40,9 +40,11 @@ public class TaskController {
             @ApiResponse(responseCode = "200", description = "List of tasks"),
             @ApiResponse(responseCode = "200", description = "[]")
     })
-    public ResponseEntity<List<TaskResponseDTO>> getAllTasks() {
+    public ResponseEntity<ApiResponseDTO<List<TaskResponseDTO>>> getAllTasks() {
         List<TaskResponseDTO> allTasks = taskService.getAllTasks();
-        return ResponseEntity.ok(allTasks);
+
+        ApiResponseDTO<List<TaskResponseDTO>> response = ApiResponseDTO.<List<TaskResponseDTO>>builder().status(200).message("Tasks successfully fetched").data(allTasks).build();
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
@@ -69,16 +71,15 @@ public class TaskController {
         return ResponseEntity.created(location).body(response);
     }
 
-
     @GetMapping("/me")
     @PreAuthorize("hasRole('DEVELOPER')")
     @Operation(summary = "Get current developer's tasks", description = "Retrieves all tasks assigned to the currently logged-in developer")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Tasks fetched successfully")
+            @ApiResponse(responseCode = "200", description = "Tasks fetched successfully"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - not a developer")
     })
-    public ResponseEntity<ApiResponseDTO<List<TaskResponseDTO>>> getMyTasks(Authentication authentication) {
-        Long developerId = ((User) authentication.getPrincipal()).getId();
-        List<TaskResponseDTO> tasks = taskService.getTasksByDeveloperId(developerId);
+    public ResponseEntity<ApiResponseDTO<List<TaskResponseDTO>>> getMyTasks() {
+        List<TaskResponseDTO> tasks = taskService.getMyTasks();
 
         ApiResponseDTO<List<TaskResponseDTO>> response = ApiResponseDTO.<List<TaskResponseDTO>>builder()
                 .status(200)
@@ -88,7 +89,6 @@ public class TaskController {
 
         return ResponseEntity.ok(response);
     }
-
 
     @PostMapping("/{taskId}/assign/{developerId}")
     @PreAuthorize("hasRole('MANAGER') or hasRole('ADMIN')")
@@ -165,7 +165,7 @@ public class TaskController {
     }
 
     @GetMapping("/developer/{developerId}")
-    @PreAuthorize("hasRole('DEVELOPER') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Get tasks by developer ID", description = "Retrieves all tasks assigned to the specified developer")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Tasks fetched successfully"),

@@ -52,4 +52,12 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+
+
+    @GetMapping("/oauth2/success")
+    public ResponseEntity<AuthResponseDTO> oauthSuccess(@RequestParam("token") String token) {
+        AuthResponseDTO response = AuthResponseDTO.builder().status(200).message("Authentication successful").token(token).build();
+        return ResponseEntity.ok(response);
+    }
+
 }

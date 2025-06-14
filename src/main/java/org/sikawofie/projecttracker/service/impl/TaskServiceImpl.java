@@ -6,16 +6,19 @@ import org.sikawofie.projecttracker.dto.TaskResponseDTO;
 import org.sikawofie.projecttracker.entity.Developer;
 import org.sikawofie.projecttracker.entity.Project;
 import org.sikawofie.projecttracker.entity.Task;
+import org.sikawofie.projecttracker.entity.User;
 import org.sikawofie.projecttracker.enums.TaskStatus;
 import org.sikawofie.projecttracker.exception.ResourceNotFoundException;
 import org.sikawofie.projecttracker.repository.DeveloperRepository;
 import org.sikawofie.projecttracker.repository.ProjectRepository;
 import org.sikawofie.projecttracker.repository.TaskRepository;
+import org.sikawofie.projecttracker.repository.UserRepo;
 import org.sikawofie.projecttracker.service.TaskService;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,6 +32,7 @@ public class TaskServiceImpl implements TaskService {
     private final DeveloperRepository developerRepository;
     private final ProjectRepository projectRepository;
     private final AuditLogService auditLogService;
+    private final UserRepo userRepo;
 
     public List<TaskResponseDTO> getAllTasks() {
         return taskRepository.findAll().stream()
@@ -97,6 +101,19 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<TaskResponseDTO> getTasksByProjectId(Long projectId) {
         return taskRepository.findByProjectId(projectId)
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskResponseDTO> getMyTasks() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String username = authentication.getName();
+
+        User currentUser = userRepo.findByUsername(username);
+        return taskRepository.findByDeveloper_Id(currentUser.getId())
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
