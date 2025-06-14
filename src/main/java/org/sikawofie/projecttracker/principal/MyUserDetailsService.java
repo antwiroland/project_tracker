@@ -1,7 +1,6 @@
 package org.sikawofie.projecttracker.principal;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+
 import lombok.RequiredArgsConstructor;
 import org.sikawofie.projecttracker.entity.User;
 import org.sikawofie.projecttracker.repository.UserRepo;

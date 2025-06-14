@@ -13,6 +13,7 @@ import org.sikawofie.projecttracker.repository.AuditLogRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class AuditLogController {
     private final AuditLogRepository auditLogRepository;
     private final AuditLogMapper auditLogMapper;
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping
     @Operation(
             summary = "Get audit logs (non-paged)",
@@ -58,6 +60,7 @@ public class AuditLogController {
         return ResponseEntity.ok(dtos);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping("/paged")
     @Operation(
             summary = "Get audit logs (paged)",
