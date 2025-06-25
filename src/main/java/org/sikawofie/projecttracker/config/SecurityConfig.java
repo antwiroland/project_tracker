@@ -44,7 +44,8 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
-                                "/api/auth/**"
+                                "/api/auth/**",
+                                "/actuator/**"
                         ).permitAll()
                         .requestMatchers("/admin/**",
                                 "/v3/api-docs/**",
