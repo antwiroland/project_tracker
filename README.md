@@ -470,9 +470,9 @@ This document outlines test scenarios, endpoints, parameters, and expected behav
 
 ---
 
-# 📊 Application Performance Report
+## 📊 Application Performance Report
 
-## 🔍 Test Summary
+### 🔍 Test Summary
 
 This report outlines the performance results of the application after running a **load test with 200 concurrent threads**, each performing a **POST request to create a task**.
 
@@ -482,7 +482,7 @@ This report outlines the performance results of the application after running a 
 
 ---
 
-## 🚦 Overall Performance Rating
+### 🚦 Overall Performance Rating
 
 | Category     | Status | Summary |
 |--------------|--------|---------|
@@ -495,16 +495,16 @@ This report outlines the performance results of the application after running a 
 
 ---
 
-## 🧠 Key Findings
+### 🧠 Key Findings
 
-### 1. CPU Load
+#### 1. CPU Load
 
 - **Process Load**: Averaged **~26–53%**
 - **System Load**: Frequently **100%**
   - App is **not CPU-intensive**, but it shares CPU with other demanding processes.
   - May lead to **scheduling delays** under heavy system load.
 
-### 2. Thread Analysis
+#### 2. Thread Analysis
 
 - **Runnable Threads**: 1–3 at most
 - **Waiting Threads**: ~200
@@ -514,7 +514,7 @@ This report outlines the performance results of the application after running a 
 💡 Interpretation:
 > Your app is **I/O-bound**, with most threads waiting on network or I/O operations. Thread pooling is oversized for the actual workload.
 
-### 3. Heap & Memory
+#### 3. Heap & Memory
 
 - **Used Heap**: ~0.21 GB (of 2.11 GB max)
 - **GC Activity**: Just **~1.99%**, minimal impact
@@ -524,13 +524,13 @@ Top memory-consuming objects:
 - `byte[]` arrays (~21 MB) — likely from buffers or data processing
 - `String`, `ConcurrentHashMap$Node` — typical usage patterns
 
-### 4. GC Telemetry
+#### 4. GC Telemetry
 
 - **0.0% GC activity** throughout test duration.
 - GC is not a limiting factor.
 - Heap remains under control.
 
-### 5. Class Loading
+#### 5. Class Loading
 
 - **Total classes**: ~19,746
 - **CPU-profiled classes**: 1,075
@@ -539,29 +539,19 @@ Top memory-consuming objects:
 
 ---
 
-## 📌 Recommendations
+#### 📌 Recommendations
 
-### ✅ What’s Working Well
+#### ✅ What’s Working Well
 - Memory management is solid; GC and heap are healthy.
 - CPU usage is efficient — no runaway threads or hot loops.
 - Class loading behavior is predictable and stable.
 
-### ⚠️ What Needs Improvement
+#### ⚠️ What Needs Improvement
 
-#### 🔧 Thread Pool Tuning
+##### 🔧 Thread Pool Tuning
 - 200 threads are overkill given the workload.
 - Most threads are idle or waiting.
 - Suggested:
   ```java
   ExecutorService ioPool = Executors.newCachedThreadPool();
   // or use custom ThreadPoolExecutor with keep-alive timeout
-
-
-
-## 🔮 Future Enhancements
-
-- Add **authentication and role-based access control**.
-- Expand **AuditLog** to include request metadata:
-    - IP Address
-    - Request Headers
----
