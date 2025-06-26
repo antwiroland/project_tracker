@@ -486,7 +486,7 @@ This report outlines the performance results of the application after running a 
 
 | Category     | Status | Summary |
 |--------------|--------|---------|
-| CPU Usage    | ⚠️ Moderate | App CPU load is fine, but system is fully utilized (100%) |
+| CPU Usage    | ⚠️ Moderate | App CPU load is fine, but the system used to perfom the performance test is fully utilized (100%) |
 | Memory Usage | ✅ Good | Low heap usage, minimal GC activity |
 | Threading    | ⚠️ I/O-Bound | Most threads are waiting; thread pool can be optimized |
 | GC Activity  | ✅ Low | No memory pressure or GC overhead |
