@@ -470,6 +470,91 @@ This document outlines test scenarios, endpoints, parameters, and expected behav
 
 ---
 
+# 📊 Application Performance Report
+
+## 🔍 Test Summary
+
+This report outlines the performance results of the application after running a **load test with 200 concurrent threads**, each performing a **POST request to create a task**.
+
+- **Threads**: 200 concurrent
+- **Operation**: POST `/createTask`
+- **Test Tools**: JProfiler, CSV telemetry exports (Threads, CPU, GC, Heap, Class)
+
+---
+
+## 🚦 Overall Performance Rating
+
+| Category     | Status | Summary |
+|--------------|--------|---------|
+| CPU Usage    | ⚠️ Moderate | App CPU load is fine, but system is fully utilized (100%) |
+| Memory Usage | ✅ Good | Low heap usage, minimal GC activity |
+| Threading    | ⚠️ I/O-Bound | Most threads are waiting; thread pool can be optimized |
+| GC Activity  | ✅ Low | No memory pressure or GC overhead |
+| Heap Objects | ⚠️ Large Arrays | `byte[]` objects dominate memory usage |
+| Class Loading| ✅ Stable | No dynamic loading spikes or classloader leaks |
+
+---
+
+## 🧠 Key Findings
+
+### 1. CPU Load
+
+- **Process Load**: Averaged **~26–53%**
+- **System Load**: Frequently **100%**
+  - App is **not CPU-intensive**, but it shares CPU with other demanding processes.
+  - May lead to **scheduling delays** under heavy system load.
+
+### 2. Thread Analysis
+
+- **Runnable Threads**: 1–3 at most
+- **Waiting Threads**: ~200
+- **Net I/O Threads**: 7–14
+- **Blocked Threads**: Rarely 1
+
+💡 Interpretation:
+> Your app is **I/O-bound**, with most threads waiting on network or I/O operations. Thread pooling is oversized for the actual workload.
+
+### 3. Heap & Memory
+
+- **Used Heap**: ~0.21 GB (of 2.11 GB max)
+- **GC Activity**: Just **~1.99%**, minimal impact
+- **No leaks or frequent GC cycles**
+
+Top memory-consuming objects:
+- `byte[]` arrays (~21 MB) — likely from buffers or data processing
+- `String`, `ConcurrentHashMap$Node` — typical usage patterns
+
+### 4. GC Telemetry
+
+- **0.0% GC activity** throughout test duration.
+- GC is not a limiting factor.
+- Heap remains under control.
+
+### 5. Class Loading
+
+- **Total classes**: ~19,746
+- **CPU-profiled classes**: 1,075
+- No unloading detected — stable class behavior.
+- No evidence of classloader leaks.
+
+---
+
+## 📌 Recommendations
+
+### ✅ What’s Working Well
+- Memory management is solid; GC and heap are healthy.
+- CPU usage is efficient — no runaway threads or hot loops.
+- Class loading behavior is predictable and stable.
+
+### ⚠️ What Needs Improvement
+
+#### 🔧 Thread Pool Tuning
+- 200 threads are overkill given the workload.
+- Most threads are idle or waiting.
+- Suggested:
+  ```java
+  ExecutorService ioPool = Executors.newCachedThreadPool();
+  // or use custom ThreadPoolExecutor with keep-alive timeout
 
 
 
