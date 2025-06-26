@@ -471,87 +471,79 @@ This document outlines test scenarios, endpoints, parameters, and expected behav
 ---
 
 ## 📊 Application Performance Report
+This report documents the results of performance testing for a Java-based backend application using JMeter for load generation and JProfiler for JVM-level telemetry. The goal was to evaluate system behavior under different stress scenarios.
 
-### 🔍 Test Summary
+### 📋 Test Configuration
 
-This report outlines the performance results of the application after running a **load test with 200 concurrent threads**, each performing a **POST request to create a task**.
-
-- **Threads**: 200 concurrent
-- **Operation**: POST `api/tasks`
-- **Test Tools**: JProfiler, CSV telemetry exports (Threads, CPU, GC, Heap, Class)
-
----
-
-### 🚦 Overall Performance Rating
-
-| Category     | Status | Summary |
-|--------------|--------|---------|
-| CPU Usage    | ⚠️ Moderate | App CPU load is fine, but the system used to perfom the performance test is fully utilized (100%) |
-| Memory Usage | ✅ Good | Low heap usage, minimal GC activity |
-| Threading    | ⚠️ I/O-Bound | Most threads are waiting; thread pool can be optimized |
-| GC Activity  | ✅ Low | No memory pressure or GC overhead |
-| Heap Objects | ⚠️ Large Arrays | `byte[]` objects dominate memory usage |
-| Class Loading| ✅ Stable | No dynamic loading spikes or classloader leaks |
+- **Test Tool**: JMeter
+- **Monitoring Tool**: JProfiler
+- **Concurrent Users (Threads)**: 200
+- **Ramp-Up Period**: 10 seconds
+- **Loop Count**: 1 and 10
+- **Endpoints Tested**:
+  - `POST /api/task` — create a task
+  - `GET /api/tasks/developer/1` — fetch tasks for developer 1
 
 ---
 
-### 🧠 Key Findings
+### 🔁 Test Scenarios
 
-#### 1. CPU Load
+#### 1. Baseline Load Test
+- **Loop Count**: 1
+- **Purpose**: Establish baseline for minimal sustained load
+- **Result**: 
+  - CPU usage negligible
+  - No GC activity
+  - Memory and threads stable
+  - Application idle most of the time
 
-- **Process Load**: Averaged **~26–53%**
-- **System Load**: Frequently **100%**
-  - App is **not CPU-intensive**, but it shares CPU with other demanding processes.
-  - May lead to **scheduling delays** under heavy system load.
-
-#### 2. Thread Analysis
-
-- **Runnable Threads**: 1–3 at most
-- **Waiting Threads**: ~200
-- **Net I/O Threads**: 7–14
-- **Blocked Threads**: Rarely 1
-
-💡 Interpretation:
-> Your app is **I/O-bound**, with most threads waiting on network or I/O operations. Thread pooling is oversized for the actual workload.
-
-#### 3. Heap & Memory
-
-- **Used Heap**: ~0.21 GB (of 2.11 GB max)
-- **GC Activity**: Just **~1.99%**, minimal impact
-- **No leaks or frequent GC cycles**
-
-Top memory-consuming objects:
-- `byte[]` arrays (~21 MB) — likely from buffers or data processing
-- `String`, `ConcurrentHashMap$Node` — typical usage patterns
-
-#### 4. GC Telemetry
-
-- **0.0% GC activity** throughout test duration.
-- GC is not a limiting factor.
-- Heap remains under control.
-
-#### 5. Class Loading
-
-- **Total classes**: ~19,746
-- **CPU-profiled classes**: 1,075
-- No unloading detected — stable class behavior.
-- No evidence of classloader leaks.
+#### 2. Moderate Load Test
+- **Loop Count**: 10
+- **Purpose**: Increase throughput, monitor memory pressure
+- **Result**:
+  - Slight increase in memory usage, but no GC triggered
+  - CPU remained under 5%
+  - Threads consistent (~28 total, 1 runnable)
 
 ---
 
-#### 📌 Recommendations
+### 🔨 Endpoint-Level Tests
 
-#### ✅ What’s Working Well
-- Memory management is solid; GC and heap are healthy.
-- CPU usage is efficient — no runaway threads or hot loops.
-- Class loading behavior is predictable and stable.
+#### 🚀 POST `/api/task`
+- **Goal**: Simulate 200 users creating tasks in parallel
+- **Observations**:
+  - CPU usage peaked at 4.67%, generally < 1%
+  - No garbage collection events
+  - Minimal thread activity
+  - No bottlenecks detected
 
-#### ⚠️ What Needs Improvement
+#### 📥 GET `/api/tasks/developer/1`
+- **Goal**: Test scalability of read-heavy endpoint
+- **Observations**:
+  - Very low CPU usage (~0.3%–0.8%)
+  - Stable heap with no GC
+  - Constant thread pool utilization
+  - Efficient response under high concurrency
 
-##### 🔧 Thread Pool Tuning
-- 200 threads are overkill given the workload.
-- Most threads are idle or waiting.
-- Suggested:
-  ```java
-  ExecutorService ioPool = Executors.newCachedThreadPool();
-  // or use custom ThreadPoolExecutor with keep-alive timeout
+---
+
+### 📈 System Health Summary
+
+| Metric         | Observation                        | Impact                          |
+|----------------|------------------------------------|----------------------------------|
+| CPU Load       | Low across all tests               | Efficient app logic              |
+| Memory Usage   | Stable, low allocation pressure    | Well-sized heap                 |
+| Garbage Collection | None during any run           | Excellent memory efficiency     |
+| Thread Behavior| Fixed pool, no blocking           | Non-blocking or async design    |
+| Class Loading  | Stable                             | Predictable and optimized code  |
+
+---
+
+### ✅ Conclusion
+
+The application demonstrates **exceptional performance** under both write and read load. It efficiently handles high concurrency using minimal system resources, making it **highly scalable** and **production-ready**. No performance bottlenecks or instabilities were observed during the tests.
+
+---
+
+
+
