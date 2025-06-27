@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @CacheConfig(cacheNames = {"tasks"})
 public class TaskServiceImpl implements TaskService {
+    TaskMetricsService taskMetricsService;
 
     private final TaskRepository taskRepository;
     private final DeveloperRepository developerRepository;
@@ -42,6 +43,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Cacheable("allTasks")
     public List<TaskResponseDTO> getAllTasks() {
+        taskMetricsService.processTasks();
         return taskRepository.findAll().stream()
                 .map(this::mapToDTO)
                 .toList();
