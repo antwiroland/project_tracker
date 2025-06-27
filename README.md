@@ -498,6 +498,36 @@ This document outlines the performance test results, profiling insights, and opt
 
 ---
 
+### 🚀 Sample images of Performance test from jProfiler BEFORE and AFTER Improvement at /api/tasks
+
+#### Creating Task CPU Before
+![Create Task CPU Diagram](docs/createTask/before/createTaskCPU.png)
+
+#### Createing Task CPU After
+![Create Task CPU Diagram](docs/createTask/after/createCPUAfter.png)
+
+
+#### Creating Task Memeory Before
+![Create Task memeory](docs/createTask/after/createTaskMemeory.png)
+
+#### Creating Task Memeory After
+![Create Task Memeory](docs/createTask/after/createTaskAfter.png)
+
+
+#### Creating Task Garbage Collections activities Before
+![Create Task GC](docs/createTask/before/createGCBefore.png)
+
+#### Creating Task Garbage Collections activities After
+![Create Task GC](docs/createTask/after/createGCAfter.png)
+
+
+#### Creating Task Thread activities Before
+![Create Task Thread](docs/createTask/before/createThread.png)
+
+####  Creating Task Thread activities After
+![Create Task Thread](docs/createTask/after/createThreadAfter.png)
+
+
 ### 🚀 Summary of Performance Improvements
 
 | Endpoint                     | Metric                  | Before         | After          | Change       |
