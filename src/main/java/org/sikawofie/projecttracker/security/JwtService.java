@@ -32,7 +32,7 @@ public class JwtService {
     public  String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
 
-        long expirationTime = 30 * 60 * 1000L;
+        long expirationTime = 3 * 24 * 60 * 60 * 1000L; // 3 days in milliseconds
 
         return  Jwts.builder()
                 .claims(claims)
