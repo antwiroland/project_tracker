@@ -508,14 +508,14 @@ This document outlines the performance test results, profiling insights, and opt
 
 
 #### Creating Task Memeory Before
-![Create Task memeory](docs/createTask/after/createTaskMemeory.png)
+![Create Task memeory](docs/createTask/before/createTaskMemeory.png)
 
 #### Creating Task Memeory After
 ![Create Task Memeory](docs/createTask/after/createTaskAfter.png)
 
 
 #### Creating Task Garbage Collections activities Before
-![Create Task GC](docs/createTask/before/createGCBefore.png)
+![Create Task GC](docs/createTask/before/createTaskGC.png)
 
 #### Creating Task Garbage Collections activities After
 ![Create Task GC](docs/createTask/after/createGCAfter.png)
