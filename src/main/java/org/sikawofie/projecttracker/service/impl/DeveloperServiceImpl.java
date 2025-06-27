@@ -21,24 +21,18 @@ public class DeveloperServiceImpl implements DeveloperService {
     private final AuditLogService auditLogService;
 
     @Override
-    @CacheEvict(value = "developers", allEntries = true)
+    @CacheEvict(value = {"developerById", "developersPage"}, allEntries = true)
     public DeveloperResponseDTO createDeveloper(DeveloperRequestDTO dto) {
         Developer developer = mapToEntity(dto);
         Developer saved = developerRepository.save(developer);
 
-        auditLogService.logAction(
-                "CREATE",
-                "Developer",
-                saved.getId().toString(),
-                saved,
-                "SYSTEM"
-        );
+        auditLogService.logAction("CREATE", "Developer", saved.getId().toString(), saved, "SYSTEM");
 
         return mapToDTO(saved);
     }
 
     @Override
-    @CacheEvict(value = "developers", key = "#id")
+    @CacheEvict(value = {"developerById", "developersPage"}, key = "#id", allEntries = true)
     public DeveloperResponseDTO updateDeveloper(Long id, DeveloperRequestDTO updatedDTO) {
         Developer existing = developerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Developer not found with ID: " + id));
@@ -49,56 +43,44 @@ public class DeveloperServiceImpl implements DeveloperService {
 
         Developer updated = developerRepository.save(existing);
 
-        auditLogService.logAction(
-                "UPDATE",
-                "Developer",
-                updated.getId().toString(),
-                updated,
-                "SYSTEM"
-        );
+        auditLogService.logAction("UPDATE", "Developer", updated.getId().toString(), updated, "SYSTEM");
 
         return mapToDTO(updated);
     }
 
     @Override
-    @CacheEvict(value = "developers", key = "#id")
+    @CacheEvict(value = {"developerById", "developersPage"}, key = "#id", allEntries = true)
     public void deleteDeveloper(Long id) {
         Developer developer = developerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Developer not found with ID: " + id));
 
         developerRepository.delete(developer);
 
-        auditLogService.logAction(
-                "DELETE",
-                "Developer",
-                developer.getId().toString(),
-                developer,
-                "SYSTEM"
-        );
+        auditLogService.logAction("DELETE", "Developer", developer.getId().toString(), developer, "SYSTEM");
     }
 
     @Override
-    @Cacheable(value = "developers")
+    @Cacheable(value = "developersPage", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<DeveloperResponseDTO> getAllDevelopers(Pageable pageable) {
         return developerRepository.findAll(pageable).map(this::mapToDTO);
     }
 
     @Override
-    @Cacheable(value = "developers", key = "#id")
+    @Cacheable(value = "developerById", key = "#id")
     public DeveloperResponseDTO getDeveloperById(Long id) {
         Developer developer = developerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Developer not found with ID: " + id));
         return mapToDTO(developer);
     }
 
-    // Helper methods
+    // Mapping helpers
     public DeveloperResponseDTO mapToDTO(Developer developer) {
-        DeveloperResponseDTO dto = new DeveloperResponseDTO();
-        dto.setId(developer.getId());
-        dto.setName(developer.getName());
-        dto.setEmail(developer.getEmail());
-        dto.setSkills(developer.getSkills());
-        return dto;
+        return DeveloperResponseDTO.builder()
+                .id(developer.getId())
+                .name(developer.getName())
+                .email(developer.getEmail())
+                .skills(developer.getSkills())
+                .build();
     }
 
     public Developer mapToEntity(DeveloperRequestDTO dto) {

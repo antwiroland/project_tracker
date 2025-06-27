@@ -14,6 +14,9 @@ import org.sikawofie.projecttracker.repository.ProjectRepository;
 import org.sikawofie.projecttracker.repository.TaskRepository;
 import org.sikawofie.projecttracker.repository.UserRepo;
 import org.sikawofie.projecttracker.service.TaskService;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,8 +27,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Service
 @RequiredArgsConstructor
+@CacheConfig(cacheNames = {"tasks"})
 public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
@@ -34,6 +39,8 @@ public class TaskServiceImpl implements TaskService {
     private final AuditLogService auditLogService;
     private final UserRepo userRepo;
 
+    @Override
+    @Cacheable("allTasks")
     public List<TaskResponseDTO> getAllTasks() {
         return taskRepository.findAll().stream()
                 .map(this::mapToDTO)
@@ -41,24 +48,19 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @CacheEvict(value = {"allTasks", "developerTasks", "projectTasks"}, allEntries = true)
     public TaskResponseDTO createTask(TaskRequestDTO dto) {
         Task task = mapToEntity(dto);
         Task savedTask = taskRepository.save(task);
 
-        // Log creation
-        auditLogService.logAction(
-                "CREATE",
-                "Task",
-                savedTask.getId().toString(),
-                savedTask,
-                "SYSTEM"
-        );
+        auditLogService.logAction("CREATE", "Task", savedTask.getId().toString(), savedTask, "SYSTEM");
 
         return mapToDTO(savedTask);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = {"allTasks", "developerTasks"}, allEntries = true)
     public TaskResponseDTO assignTask(Long taskId, Long developerId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id " + taskId));
@@ -69,99 +71,82 @@ public class TaskServiceImpl implements TaskService {
         task.setDeveloper(developer);
         Task updated = taskRepository.save(task);
 
-        // Log assignment
-        auditLogService.logAction(
-                "UPDATE",
-                "Task",
-                updated.getId().toString(),
-                updated,
-                "SYSTEM"
-        );
+        auditLogService.logAction("UPDATE", "Task", updated.getId().toString(), updated, "SYSTEM");
 
         return mapToDTO(updated);
     }
 
     @Override
+    @CacheEvict(value = {"allTasks", "developerTasks", "projectTasks"}, allEntries = true)
     public void deleteTask(Long taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id " + taskId));
 
         taskRepository.delete(task);
 
-        // Log deletion
-        auditLogService.logAction(
-                "DELETE",
-                "Task",
-                task.getId().toString(),
-                task,
-                "SYSTEM"
-        );
+        auditLogService.logAction("DELETE", "Task", task.getId().toString(), task, "SYSTEM");
     }
 
     @Override
+    @Cacheable(value = "projectTasks", key = "#projectId")
     public List<TaskResponseDTO> getTasksByProjectId(Long projectId) {
-        return taskRepository.findByProjectId(projectId)
-                .stream()
+        return taskRepository.findByProjectId(projectId).stream()
                 .map(this::mapToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
+    @Cacheable(value = "developerTasks", key = "#root.methodName")
     public List<TaskResponseDTO> getMyTasks() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        String username = authentication.getName();
-
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepo.findByUsername(username);
         return taskRepository.findByDeveloper_Id(currentUser.getId())
                 .stream()
                 .map(this::mapToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
+    @Cacheable(value = "developerTasks", key = "#developerId")
     public List<TaskResponseDTO> getTasksByDeveloperId(Long developerId) {
-        return taskRepository.findByDeveloper_Id(developerId)
-                .stream()
+        return taskRepository.findByDeveloper_Id(developerId).stream()
                 .map(this::mapToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
+    @Cacheable("overdueTasks")
     public List<TaskResponseDTO> getOverdueTasks() {
         return taskRepository.findByDueDateBeforeAndStatusNot(LocalDate.now(), TaskStatus.DONE)
                 .stream()
                 .map(this::mapToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
+    @Cacheable(value = "sortedTasks", key = "#sortBy")
     public List<TaskResponseDTO> getTasksSorted(String sortBy) {
         return taskRepository.findAll(Sort.by(Sort.Direction.ASC, sortBy))
                 .stream()
                 .map(this::mapToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
+    @Transactional
+    @CacheEvict(value = {"allTasks", "developerTasks", "projectTasks"}, allEntries = true)
     public TaskResponseDTO updateTask(long id, TaskRequestDTO taskRequestDTO) {
-        Task task =  taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task with " + id + " not found" )
-        );
-        if(taskRequestDTO.getTitle() != null) {
-           task.setTitle(taskRequestDTO.getTitle());
-        }
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Task with " + id + " not found"));
 
-        if(taskRequestDTO.getDescription() != null) {
-            task.setDescription(taskRequestDTO.getDescription());
-        }
+        if (taskRequestDTO.getTitle() != null) task.setTitle(taskRequestDTO.getTitle());
+        if (taskRequestDTO.getDescription() != null) task.setDescription(taskRequestDTO.getDescription());
+        if (taskRequestDTO.getStatus() != null) task.setStatus(taskRequestDTO.getStatus());
 
-        if(taskRequestDTO.getStatus() != null) {
-            task.setStatus(taskRequestDTO.getStatus());
-        }
         return mapToDTO(taskRepository.save(task));
     }
 
-    // Mapping methods
+    // Helper mapping methods
     private TaskResponseDTO mapToDTO(Task task) {
         return TaskResponseDTO.builder()
                 .id(task.getId())
@@ -189,8 +174,6 @@ public class TaskServiceImpl implements TaskService {
             Developer developer = developerRepository.findById(dto.getDeveloperId())
                     .orElseThrow(() -> new ResourceNotFoundException("Developer not found with id " + dto.getDeveloperId()));
             task.setDeveloper(developer);
-        } else {
-            task.setDeveloper(null);
         }
 
         return task;

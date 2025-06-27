@@ -1,8 +1,6 @@
 package org.sikawofie.projecttracker.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.sikawofie.projecttracker.enums.ProjectStatus;
 

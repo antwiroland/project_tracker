@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 @Service
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
@@ -24,26 +25,20 @@ public class ProjectServiceImpl implements ProjectService {
     private final AuditLogService auditLogService;
 
     @Override
-    @CacheEvict(value = "projects", allEntries = true)
+    @Transactional
+    @CacheEvict(value = {"projects", "projectsPage"}, allEntries = true)
     public ProjectResponseDTO createProject(ProjectRequestDTO dto) {
         Project project = mapToEntity(dto);
         Project saved = projectRepository.save(project);
 
-        // Log creation
-        auditLogService.logAction(
-                "CREATE",
-                "Project",
-                saved.getId().toString(),
-                saved,
-                "SYSTEM"
-        );
+        auditLogService.logAction("CREATE", "Project", saved.getId().toString(), saved, "SYSTEM");
 
         return mapToDTO(saved);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "projects", key = "#id")
+    @CacheEvict(value = {"projects", "projectsPage"}, key = "#id", allEntries = true)
     public ProjectResponseDTO updateProject(Long id, ProjectRequestDTO dto) {
         Project existing = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id " + id));
@@ -55,21 +50,14 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project updated = projectRepository.save(existing);
 
-        // Log update
-        auditLogService.logAction(
-                "UPDATE",
-                "Project",
-                updated.getId().toString(),
-                updated,
-                "SYSTEM"
-        );
+        auditLogService.logAction("UPDATE", "Project", updated.getId().toString(), updated, "SYSTEM");
 
         return mapToDTO(updated);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "projects", key = "#id")
+    @CacheEvict(value = {"projects", "projectsPage"}, key = "#id", allEntries = true)
     public void deleteProject(Long id) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id " + id));
@@ -77,14 +65,7 @@ public class ProjectServiceImpl implements ProjectService {
         taskRepository.deleteAll(project.getTasks());
         projectRepository.delete(project);
 
-        // Log deletion
-        auditLogService.logAction(
-                "DELETE",
-                "Project",
-                project.getId().toString(),
-                project,
-                "SYSTEM"
-        );
+        auditLogService.logAction("DELETE", "Project", project.getId().toString(), project, "SYSTEM");
     }
 
     @Override
@@ -96,6 +77,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    @Cacheable(value = "projectsPage", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<ProjectResponseDTO> getAllProjects(Pageable pageable) {
         return projectRepository.findAll(pageable).map(this::mapToDTO);
     }

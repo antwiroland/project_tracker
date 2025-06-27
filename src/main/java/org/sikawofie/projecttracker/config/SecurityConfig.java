@@ -45,7 +45,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/actuator/**"
+                                "/actuator/health",
+                                "/actuator/metrics",
+                                 "/actuator/heapdump",
+                                "/actuator/prometheus"
                         ).permitAll()
                         .requestMatchers("/admin/**",
                                 "/v3/api-docs/**",
