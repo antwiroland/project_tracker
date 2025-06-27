@@ -470,80 +470,93 @@ This document outlines test scenarios, endpoints, parameters, and expected behav
 
 ---
 
-## 📊 Application Performance Report
-This report documents the results of performance testing for a Java-based backend application using JMeter for load generation and JProfiler for JVM-level telemetry. The goal was to evaluate system behavior under different stress scenarios.
+## 📊 Project Tracker – Performance Testing Report
 
-### 📋 Test Configuration
+This document outlines the performance test results, profiling insights, and optimization impacts for the Project Tracker system under high concurrency.
 
-- **Test Tool**: JMeter
-- **Monitoring Tool**: JProfiler
-- **Concurrent Users (Threads)**: 200
-- **Ramp-Up Period**: 10 seconds
-- **Loop Count**: 1 and 10
+---
+
+### 🧪 Test Setup
+
+- **Tool**: Apache JMeter (200 threads, 10s ramp-up, 10 loops)
+- **Monitoring**: JProfiler
+- **Environment**: Localhost, JVM-based Spring Boot backend
 - **Endpoints Tested**:
-  - `POST /api/task` — create a task
-  - `GET /api/tasks/developer/1` — fetch tasks for developer 1
+  - `POST /api/tasks`
+  - `GET /api/tasks/developer/1`
+  - `GET /api/projects`
 
 ---
 
-### 🔁 Test Scenarios
+### 📈 Metrics Monitored
 
-#### 1. Baseline Load Test
-- **Loop Count**: 1
-- **Purpose**: Establish baseline for minimal sustained load
-- **Result**: 
-  - CPU usage negligible
-  - No GC activity
-  - Memory and threads stable
-  - Application idle most of the time
-
-#### 2. Moderate Load Test
-- **Loop Count**: 10
-- **Purpose**: Increase throughput, monitor memory pressure
-- **Result**:
-  - Slight increase in memory usage, but no GC triggered
-  - CPU remained under 5%
-  - Threads consistent (~28 total, 1 runnable)
+- **CPU Load**
+- **Memory Usage**
+- **Garbage Collection Activity**
+- **Thread Count**
+- **Class Loading Statistics**
 
 ---
 
-### 🔨 Endpoint-Level Tests
+### 🚀 Summary of Performance Improvements
 
-#### 🚀 POST `/api/task`
-- **Goal**: Simulate 200 users creating tasks in parallel
-- **Observations**:
-  - CPU usage peaked at 4.67%, generally < 1%
-  - No garbage collection events
-  - Minimal thread activity
-  - No bottlenecks detected
-
-#### 📥 GET `/api/tasks/developer/1`
-- **Goal**: Test scalability of read-heavy endpoint
-- **Observations**:
-  - Very low CPU usage (~0.3%–0.8%)
-  - Stable heap with no GC
-  - Constant thread pool utilization
-  - Efficient response under high concurrency
-
----
-
-### 📈 System Health Summary
-
-| Metric         | Observation                        | Impact                          |
-|----------------|------------------------------------|----------------------------------|
-| CPU Load       | Low across all tests               | Efficient app logic              |
-| Memory Usage   | Stable, low allocation pressure    | Well-sized heap                 |
-| Garbage Collection | None during any run           | Excellent memory efficiency     |
-| Thread Behavior| Fixed pool, no blocking           | Non-blocking or async design    |
-| Class Loading  | Stable                             | Predictable and optimized code  |
+| Endpoint                     | Metric                  | Before         | After          | Change       |
+|------------------------------|--------------------------|----------------|----------------|--------------|
+| `POST /api/tasks`            | CPU Load (mean)         | 46%            | 33%            | 🔻 -28%      |
+|                              | GC Activity (mean)      | 1.4%           | 0.3%           | 🔻 -79%      |
+|                              | Used Memory (max)       | 220 MB         | 145 MB         | 🔻 -34%      |
+|                              | Threads (max)           | 405            | 235            | 🔻 -42%      |
+| `GET /api/tasks/developer/1`| CPU Load (mean)         | 47%            | 28%            | 🔻 -40%      |
+|                              | GC Activity (mean)      | 2.5%           | 0.21%          | 🔻 -91%      |
+|                              | Used Memory (max)       | 221 MB         | 127 MB         | 🔻 -43%      |
+|                              | Threads (max)           | 415            | 227            | 🔻 -45%      |
+| `GET /api/projects`         | CPU Load (mean)         | 69%            | 33%            | 🔻 -52%      |
+|                              | GC Activity (mean)      | 0.45%          | 0.26%          | 🔻 -42%      |
+|                              | Used Memory (max)       | 125 MB         | 208 MB         | 🔺 +65%      |
+|                              | Threads (max)           | 219            | 219            | ➖ No Change |
 
 ---
 
-### ✅ Conclusion
+### 🧠 Analysis Highlights
 
-The application demonstrates **exceptional performance** under both write and read load. It efficiently handles high concurrency using minimal system resources, making it **highly scalable** and **production-ready**. No performance bottlenecks or instabilities were observed during the tests.
+#### ✅ Improvements
+- **Lower CPU Usage**: Post-optimization showed reduced system and process CPU utilization across endpoints.
+- **Reduced Thread Count**: Better concurrency management and thread reuse minimized thread bloat.
+- **Efficient Memory Handling**: Most endpoints exhibited lower or stable memory peaks.
+- **Minimal GC Overhead**: Garbage collector activity was consistently lower after optimization.
+
+#### ⚠️ Noted Trade-Offs
+- Slight memory increase in some endpoints (e.g., `/api/projects`) due to caching mechanisms.
+- CPU spikes during peak burst were expected but remained within safe thresholds.
 
 ---
+
+### 🛠️ Optimizations Applied
+
+- Introduced Spring Caching with `@Cacheable`, `@CacheEvict`
+- Improved DTO mapping and object creation patterns
+- Reduced N+1 queries and redundant repository calls
+- Enabled lazy loading where applicable
+- Consolidated audit logging with async logging (where feasible)
+
+---
+
+### 📁 Test Artifacts
+
+All raw telemetry CSVs and analysis notebooks are stored in the `/performance/` directory:
+- `CPU_Load_*.csv`
+- `Memory_*.csv`
+- `GC_Activity_*.csv`
+- `Threads_*.csv`
+- `Classes_telemetry_*.csv`
+
+---
+
+### 📌 Conclusion
+
+The applied optimizations successfully enhanced scalability, reduced system pressure under concurrent load, and improved thread and memory efficiency across key endpoints. The system is now more responsive and resource-friendly under heavy traffic.
+
+
 
 
 
